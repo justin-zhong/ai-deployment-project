@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# 数据文件（太大不上传）
+*.pth
+*.pt
+data/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# 环境
+.env
+venv/
