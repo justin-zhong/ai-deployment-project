@@ -1,0 +1,3 @@
+LangChain是一个用于开发大语言模型应用的框架。
+它提供了Chain、Agent、Memory等模块。
+RAG是LangChain最常用的应用场景之一。
