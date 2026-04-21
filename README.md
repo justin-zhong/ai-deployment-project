@@ -4,21 +4,21 @@
 
 ## 📁 项目结构
 ai-deployment-project/
-├── README.md # 项目说明
-├── .gitignore # Git 忽略文件
-├── A_W1D1.ipynb # 路径A：PyTorch MNIST 训练
-├── A_W1D2.ipynb # 路径A：推理 + 可视化
-├── A_W1D3.ipynb # 路径A：手写数字测试 + ONNX 导出
-├── A_W1D4.ipynb # 路径A：ONNX Runtime 推理 + 速度对比
-├── B_W1D1.ipynb # 路径B：RAG 概念 + 最简 Demo
-├── B_W1D2.ipynb # 路径B：LangChain + Chroma + 检索
-├── B_W1D3.ipynb # 路径B：完整 RAG（检索 + LLM 生成）
-├── B_W1D4.ipynb # 路径B：Agent 入门 + Tool 调用
-├── B_W1D5.ipynb # 路径B：Agent with Memory
-├── mnist_model.pth # PyTorch 训练好的模型（已忽略）
-├── mnist_model.onnx # ONNX 导出模型
-├── data/ # MNIST 数据集（已忽略）
-└── images/ # 图片文件
+  ├── README.md # 项目说明
+  ├── .gitignore # Git 忽略文件
+  ├── A_W1D1.ipynb # 路径A：PyTorch MNIST 训练
+  ├── A_W1D2.ipynb # 路径A：推理 + 可视化
+  ├── A_W1D3.ipynb # 路径A：手写数字测试 + ONNX 导出
+  ├── A_W1D4.ipynb # 路径A：ONNX Runtime 推理 + 速度对比
+  ├── B_W1D1.ipynb # 路径B：RAG 概念 + 最简 Demo
+  ├── B_W1D2.ipynb # 路径B：LangChain + Chroma + 检索
+  ├── B_W1D3.ipynb # 路径B：完整 RAG（检索 + LLM 生成）
+  ├── B_W1D4.ipynb # 路径B：Agent 入门 + Tool 调用
+  ├── B_W1D5.ipynb # 路径B：Agent with Memory
+  ├── mnist_model.pth # PyTorch 训练好的模型（已忽略）
+  ├── mnist_model.onnx # ONNX 导出模型
+  ├── data/ # MNIST 数据集（已忽略）
+  └── images/ # 图片文件
 
 
 ## 🚀 项目亮点
