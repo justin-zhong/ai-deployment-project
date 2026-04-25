@@ -11,6 +11,7 @@ from src.loader import load_documents, split_documents
 from src.embedder import build_vectorstore, load_vectorstore
 from src.retriever import get_retriever
 from src.chain import build_rag_chain, ask
+from src.evaluator import evaluate, print_report
 
 # ---- 页面配置 ----
 st.set_page_config(page_title="📚 知识库问答", layout="centered")
@@ -31,14 +32,19 @@ with st.sidebar:
                 vectorstore = build_vectorstore(chunks)
                 st.session_state.vectorstore = vectorstore
             st.success(f"✅ 已索引 {len(chunks)} 个片段")
-
     # 尝试加载已有向量库
     if "vectorstore" not in st.session_state:
         vs = load_vectorstore()
         if vs:
             st.session_state.vectorstore = vs
             st.info("已加载本地向量库")
-
+    if st.button("运行评估", use_container_width=True):
+        with st.spinner(""):
+            retriever = get_retriever(st.session_state.vectorstore)
+            chain = build_rag_chain(retriever)
+            test_report = evaluate(chain)
+            print_report(test_report)
+        st.success(f"✅ 已运行评估")
     st.divider()
     st.markdown("**使用步骤**")
     st.markdown("1. 把文档放入 `data/` 目录")

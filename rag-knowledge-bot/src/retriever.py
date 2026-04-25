@@ -59,5 +59,6 @@ def search(vectorstore, query: str, k: int = 4) -> list:
 if __name__ == "__main__":
     from embedder import build_vectorstore, load_vectorstore
     vectorstore = load_vectorstore()
-    results = search(vectorstore, "调试技巧", k=4)
-    results = search(vectorstore, "怎么检查 chunk 质量？", k=4)
+    results = search(vectorstore, "什么是 Bootgen 工具？", k=4)
+    results = search(vectorstore, "如何在 BIF 文件中定义分区？", k=4)
+    results = search(vectorstore, "如何在 BIF 文件中指定启动设备？", k=4)
