@@ -8,6 +8,7 @@ app.py - 主入口（UI 已写好，专注实现 src/ 里的逻辑）
 import streamlit as st
 import os
 from agent import agent
+from agent_lg import app
 
 import sys
 sys.path.append("../rag-knowledge-bot")  # 指向项目2的路径
@@ -81,7 +82,7 @@ if question := st.chat_input("请输入你的问题..."):
         with st.chat_message("assistant"):
             with st.spinner("思考中..."):
                 st.session_state.chat_history.append(("user", question))
-                answer = agent.invoke({"messages": st.session_state.chat_history})
+                answer = app.invoke({"messages": st.session_state.chat_history})
                 st.session_state.chat_history.append(("assistant", answer['messages'][-1].content))
             st.write(answer['messages'][-1].content)
 
