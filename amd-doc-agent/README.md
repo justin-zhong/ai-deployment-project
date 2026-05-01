@@ -1,102 +1,115 @@
-# 📚 AMD Bootgen 技术文档问答机器人
+---
+title: AMD Doc Agent
+emoji: 🤖
+colorFrom: red
+colorTo: blue
+sdk: docker
+pinned: false
+---
 
-基于 RAG（检索增强生成）的垂直领域知识库问答系统，专为 AMD FPGA/SoC 技术文档设计。当前知识库基于 UG1283 Bootgen 用户指南（2025.2），支持用自然语言查询启动镜像生成、BIF 语法、加密认证等技术问题。
+# 🔍 AMD 技术文档多文档问答系统
+
+基于 RAG（检索增强生成）的多文档知识库问答系统，专为 AMD FPGA/SoC 技术文档设计。是 [RAG 知识库问答项目](../rag-knowledge-bot) 和 [Bootgen Agent 项目](../bootgen-agent) 的进阶版本，新增多文档支持、多语言检索和云端部署。
+
+🚀 **Live Demo**: [https://huggingface.co/spaces/chongyuanz/amd-doc-agent](https://huggingface.co/spaces/chongyuanz/amd-doc-agent)
+
+## 知识库文档
+
+| 文档 | 内容 | 语言 |
+|------|------|------|
+| UG1283 | Bootgen 用户指南 | 中文 |
+| UG1085 | Zynq UltraScale+ 技术参考手册 | 英文 |
+| UG1137 | Zynq UltraScale+ MPSoC 软件开发指南 | 英文 |
+
+三份文档覆盖"硬件架构 → 软件开发 → 镜像生成工具"完整链路，支持跨文档综合查询。
 
 ## Demo
 
-> 问：authentication 在引导中的角色是什么？
+> 问：FSBL 的作用是什么？
 >
-> 答：认证（authentication）在引导过程中用于确保分区（包括报头表）的完整性和来源可信性。具体通过为分区启用身份验证并指定 PPK（主公钥）实现，分区使用 SSK 来签名，签名填充到 AC 中，PPK 将散列化并存储在 eFUSE 中。
+> 答：根据 UG1085，FSBL 执行开始后 CSU ROM 进入后配置阶段，负责系统篡改响应。根据 UG1137，FSBL 直接从 FLASH 设备复制比特流块并执行身份验证。根据 UG1283，FSBL 在启动流程中涉及加密、签名等多个安全阶段。
+>
+> （信息来自 UG1085、UG1137、UG1283）
 
-> 问：如何在命令行使用 bootgen？
->
-> 答：在命令行中使用 Bootgen 的基本语法为 `bootgen -arch <架构> -image <bif文件> -o <输出文件>`，例如 `bootgen -arch zynqmp -image test.bif -w -o boot.bin`。
+## 核心特性
+
+**多文档检索**
+三份文档统一向量化存入 FAISS，每个 chunk 打上来源标签（`source`、`filename`），检索时跨文档召回。
+
+**多语言检索（Query Translation）**
+中英文混合知识库存在语义匹配偏差——中文问题和中文 chunk 向量天然更近，导致英文文档系统性被忽略。解决方案：检索前用 LLM 将用户问题翻译成英文，同时用中英文两个 query 检索，合并去重后取 top-k，显著提升英文文档的召回率。
+
+**来源标注**
+每个 chunk 携带 `metadata["source"]`，Prompt 中要求 LLM 回答时注明来源文档，回答可追溯。
+
+**云端部署**
+Docker 容器化，部署于 Hugging Face Spaces（CPU Free tier），公网可访问。
 
 ## 技术栈
 
 - **LangChain** — RAG 框架（文档加载、切分、检索链）
-- **OpenAI** — text-embedding-ada-002 向量化 + GPT-4o-mini 生成
-- **FAISS** — 本地向量数据库，支持持久化
+- **OpenAI** — text-embedding-ada-002 向量化
+- **DeepSeek** — LLM 生成（成本低，效果好）
+- **FAISS** — 本地向量数据库
 - **Streamlit** — Web UI
+- **Docker** — 容器化部署
+- **Hugging Face Spaces** — 云端托管
 
 ## 快速开始
 
 ```bash
-# 1. 安装依赖
+# 本地运行
 pip install -r requirements.txt
-
-# 2. 配置 API Key
 cp .env.example .env
-# 编辑 .env，填入你的 OPENAI_API_KEY
-
-# 3. 放入文档（支持 PDF、TXT）
-cp your_docs.pdf data/
-
-# 4. 启动
+# 填入 OPENAI_API_KEY 和 DEEPSEEK_API_KEY
 streamlit run app.py
-```
 
-启动后在左侧点击「加载并索引文档」，完成后即可在右侧提问。
+# Docker 运行
+docker build -t amd-doc-agent .
+docker run -p 8501:8501 \
+  -e OPENAI_API_KEY=your_key \
+  -e DEEPSEEK_API_KEY=your_key \
+  amd-doc-agent
+```
 
 ## 项目结构
 
 ```
-├── data/               # 知识库文档（当前：UG1283 Bootgen 用户指南）
+├── data/                  # 三份 AMD 技术文档 PDF
 ├── src/
-│   ├── loader.py       # 文档加载、PDF 噪音清洗与 chunk 切分
-│   ├── embedder.py     # 向量化与 FAISS 存储
-│   ├── retriever.py    # 相似度检索
-│   ├── chain.py        # RAG 链组装（Prompt + LLM）
-│   └── evaluator.py    # 自动评估模块（15道测试题 + 关键词匹配评分）
-├── app.py              # Streamlit 入口（含评估面板）
-├── vectorstore/        # 向量库持久化（自动生成）
-└── requirements.txt
+│   ├── loader.py          # 多文档加载、噪音清洗、来源标注
+│   ├── embedder.py        # 向量化与 FAISS 存储
+│   ├── retriever.py       # 相似度检索 + 多语言检索
+│   └── chain.py           # RAG 链组装（含来源标注 Prompt）
+├── app.py                 # Streamlit 入口
+├── Dockerfile
+├── requirements.txt
+└── README.md
 ```
 
-## RAG 工作流程
+## 与前序项目的关系
 
 ```
-【离线索引】
-文档（PDF/TXT）→ 切分 chunk → Embedding 向量化 → 存入 FAISS
-
-【在线查询】
-用户提问 → Embedding 向量化 → FAISS 相似度检索 → top-k chunk
-                                                        ↓
-                                           拼入 Prompt → LLM → 回答
+项目1: 基础 RAG（单文档、本地）
+    ↓ 加入垂直领域 + 评估模块
+项目2: AMD Bootgen 专属问答（单文档、本地）
+    ↓ 加入 Agent + 工具调用
+项目3: Bootgen Agent（LangChain → LangGraph）
+    ↓ 加入多文档 + 多语言检索 + 部署
+项目4: AMD 多文档问答系统（多文档、云端）← 当前项目
 ```
 
-## 参数调优记录
+## 技术挑战与发现
 
-在开发过程中，通过实验发现 chunk 切分参数对检索质量影响显著。以下是针对同一问题（"调试技巧有哪些？"）在不同参数下的表现：
+**中英文混合知识库的检索偏差**
+使用 OpenAI embedding 时，中文问题和中文 chunk 的向量相似度天然高于英文 chunk，导致英文文档被系统性忽略。通过 Query Translation 在检索前将问题翻译为英文，实现双语并行检索，有效解决了这一问题。
 
-| chunk_size | chunk_overlap | 结果 |
-|-----------|--------------|------|
-| 500 | 50 | ❌ 回答"没有找到相关信息" |
-| 500 | 150 | ✅ 能回答，但内容不完整（2/3条） |
-| 800 | 100 | ✅ 回答完整，并能主动关联相关内容 |
+**PDF 噪音对检索质量的影响**
+技术文档的页眉、页脚、页码会污染向量空间，使不相关 chunk 的向量距离被人为拉近。通过正则清洗 + 跳过封面目录页，将 chunk 数量从原始的 ~2000 降至 1792，检索区分度明显提升。
 
-**结论：** chunk_size 影响语义完整性，chunk_overlap 是补救边界截断的手段。优先保证单个 chunk 能装下一个完整的语义单元，overlap 只用于减少边界损失。本项目最终采用 `chunk_size=800, chunk_overlap=100`。
+## 已知局限与后续方向
 
-**调试方法：** 通过 `retriever.py` 中的 `search()` 函数直接打印检索结果，可以快速判断问题出在检索层还是生成层，避免盲目调整 Prompt。
-
-## 技术文档 RAG 的挑战与发现
-
-将通用 RAG 系统迁移到 AMD UG1283 等专业技术文档时，遇到了以下问题并逐一排查：
-
-| 问题 | 根本原因 | 解决方案 | 结果 |
-|------|---------|---------|------|
-| 大量内容检索失败 | PDF 页眉页脚噪音（页码、文档编号、"Send Feedback"）混入 chunk | 正则清洗三类噪音模式 + 跳过前6页封面目录 | chunk 从 636 降至 559，噪音显著减少 |
-| 部分内容仍检索不到 | chunk 跨越多个主题，语义被稀释 | 调整 chunk_size/overlap | 部分改善 |
-| 评估准确率偏低 | 用户问题措辞与文档术语风格不匹配 | 缩短问题、贴近文档原文术语 | 有所改善，但仍有差距 |
-| 检索区分度差 | 残留页脚（"附录A/B/C"、章节标题）反复出现，拉近了不相关 chunk 的向量距离 | — | 待解决 |
-
-**核心发现：** 技术文档 RAG 的瓶颈不在 LLM，而在数据质量和检索层。噪音清洗、chunk 策略、问题改写（Query Rewriting）对最终效果的影响远大于更换更强的模型。
-
-**下一步方向：** 考虑引入 Query Rewriting——在检索前用 LLM 将用户的自然语言问题改写为更贴近文档术语风格的检索 query，以提升召回率。
-
-## 已知局限
-
-- PDF 中的图表、多栏表格解析质量有限，部分内容可能丢失语义
-- 向量化使用 OpenAI API，需要联网和费用
-- 当前知识库仅含 UG1283，扩展多文档时建议替换为 Pinecone 等云端向量库
-- 检索区分度受残留页脚影响，考虑改用网页版文档加载（WebBaseLoader）以获得更干净的文本
+- 英文文档的表格、多栏布局解析质量有限
+- Query Translation 增加了一次额外的 LLM 调用，响应时间略有增加
+- 可扩展至更多 AMD 文档（AM011、UG1304 等），建议届时替换为 Pinecone 等云端向量库
+- 可引入 Re-ranking 模型对检索结果重排序，进一步提升准确率
