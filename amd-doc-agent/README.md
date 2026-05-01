@@ -1,12 +1,3 @@
----
-title: AMD Doc Agent
-emoji: 🤖
-colorFrom: red
-colorTo: blue
-sdk: docker
-pinned: false
----
-
 # 🔍 AMD 技术文档多文档问答系统
 
 基于 RAG（检索增强生成）的多文档知识库问答系统，专为 AMD FPGA/SoC 技术文档设计。是 [RAG 知识库问答项目](../rag-knowledge-bot) 和 [Bootgen Agent 项目](../bootgen-agent) 的进阶版本，新增多文档支持、多语言检索和云端部署。
