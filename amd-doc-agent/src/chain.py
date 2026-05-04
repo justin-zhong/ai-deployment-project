@@ -12,19 +12,13 @@ chain.py - 组装 RAG 链
 - context：检索到的相关 chunk，会被填入 prompt
 """
 
-from langchain_deepseek import ChatDeepSeek
+from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough, RunnableLambda
 from langchain_core.output_parsers import StrOutputParser
-from src.retriever import retrieve_multilingual
+from retriever import retrieve_multilingual
 import os
 
-
-# TODO: 写一个好的 Prompt Template
-# 思考：
-# 1. 如何告诉 LLM 只用提供的 context 回答，不要乱编？
-# 2. 如果 context 里没有答案，应该怎么说？
-# 3. 回答应该是什么风格？
 PROMPT_TEMPLATE = """
 你是一个知识库问答助手。请根据以下上下文回答用户的问题。
 
@@ -33,17 +27,13 @@ PROMPT_TEMPLATE = """
 
 问题：{question}
 
-// TODO: 补充你的指令
-// 提示：考虑加上"如果上下文中没有相关信息，请说明..."
 回答时请注明信息来自哪份文档（如"根据UG1283..."）。如果上下文中没有相关信息，请说明“没有找到相关信息”并打印，不要自己创造答案。
 """
 
 
 def format_docs(docs) -> str:
     """把检索到的文档列表拼接成字符串"""
-    # TODO: 把 docs 里每个 doc.page_content 拼接起来
-    # 提示："\n\n".join([doc.page_content for doc in docs])
-    return "\n\n".join([f"{doc.metadata['source']}\n{doc.page_content}" for doc in docs])  # 替换这一行
+    return "\n\n".join([f"{doc.metadata['source']}\n{doc.page_content}" for doc in docs])
 
 
 def build_rag_chain(retriever, vs):
@@ -56,21 +46,15 @@ def build_rag_chain(retriever, vs):
     Returns:
         chain: 可以直接调用的 RAG 链
     """
-    # TODO: 初始化 LLM
-    # 提示：llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
-    # 思考：temperature=0 意味着什么？什么场景下应该调高？
-    llm = ChatDeepSeek(model= "deepseek-chat", api_key = os.getenv('DEEPSEEK_API_KEY'), temperature=0)# 替换这一行
+    llm = ChatOpenAI(
+        model="deepseek-chat",
+        api_key=os.getenv("DEEPSEEK_API_KEY"),
+        base_url="https://api.deepseek.com",
+        temperature=0
+    )
 
     prompt = ChatPromptTemplate.from_template(PROMPT_TEMPLATE)
 
-    # TODO: 用 LCEL 组装链
-    # 标准 RAG 链结构：
-    # chain = (
-    #     {"context": retriever | format_docs, "question": RunnablePassthrough()}
-    #     | prompt
-    #     | llm
-    #     | StrOutputParser()
-    # )
     multilingual_retriever = RunnableLambda(lambda q: retrieve_multilingual(vs, q, k=4))
     
     chain = (
@@ -79,7 +63,7 @@ def build_rag_chain(retriever, vs):
         | prompt
         | llm
         | StrOutputParser()
-    )# 替换这一行
+    )
 
     return chain
 
@@ -95,8 +79,7 @@ def ask(chain, question: str) -> str:
     Returns:
         answer: 字符串答案
     """
-    # TODO: 调用 chain.invoke(question)
-    answer = chain.invoke(question)  # 替换这一行
+    answer = chain.invoke(question)
 
     return answer
 

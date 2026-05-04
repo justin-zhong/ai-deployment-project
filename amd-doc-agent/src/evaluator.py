@@ -1,5 +1,5 @@
 # evaluator.py
-from src.chain import ask
+from chain import ask
 
 TEST_CASES = [
     {

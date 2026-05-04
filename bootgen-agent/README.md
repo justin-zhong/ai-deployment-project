@@ -1,4 +1,4 @@
-# 🤖 Bootgen 智能助手 Agent
+# 🤖 项目1+项目2：Bootgen 智能助手 Agent
 
 基于 LangGraph 的 AMD Bootgen 专属助手，是[RAG 知识库问答项目](../rag-knowledge-bot)的进阶版本。相比纯 RAG 方案，Agent 能主动决策调用哪个工具、按需链式执行多步操作，对结构化任务（BIF 生成、命令校验、器件对比）的回答质量显著优于检索方式。
 

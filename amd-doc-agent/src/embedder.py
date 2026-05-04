@@ -12,13 +12,17 @@ embedder.py - 向量化与存储
 - 持久化：向量计算很慢，保存到磁盘下次直接加载
 """
 
-from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 import os
+import torch
 
 VECTORSTORE_PATH = "vectorstore"
 
 vectorstore = None
+
+# This will automatically be 'cuda' when the GPU is available
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 def build_vectorstore(chunks: list):
     """
@@ -32,19 +36,14 @@ def build_vectorstore(chunks: list):
     """
     print("正在向量化，请稍候...")
 
-    # TODO: 初始化 OpenAIEmbeddings
-    # 提示：embeddings = OpenAIEmbeddings()
     embeddings = HuggingFaceEmbeddings(
         model_name="sentence-transformers/all-MiniLM-L6-v2",
-        model_kwargs={'device': 'cuda'},  # Use 'cuda' if you have GPU
+        model_kwargs={'device': device}, 
         encode_kwargs={'normalize_embeddings': True},
     )
 
-    # TODO: 用 FAISS.from_documents(chunks, embeddings) 创建向量库
-    vectorstore = FAISS.from_documents(chunks, embeddings)  # 替换这一行
+    vectorstore = FAISS.from_documents(chunks, embeddings)
 
-    # TODO: 把向量库保存到本地（VECTORSTORE_PATH）
-    # 提示：vectorstore.save_local(VECTORSTORE_PATH)
     vectorstore.save_local(VECTORSTORE_PATH)
     print(f"向量库已保存到 {VECTORSTORE_PATH}/")
     return vectorstore
@@ -63,14 +62,17 @@ def load_vectorstore():
     not os.path.exists(os.path.join(VECTORSTORE_PATH, "index.pkl")):
         return None
 
-    # TODO: 用 FAISS.load_local() 加载
-    # 注意：需要传入 embeddings 和 allow_dangerous_deserialization=True
-    # 提示：FAISS.load_local(VECTORSTORE_PATH, embeddings, allow_dangerous_deserialization=True)
     embeddings = HuggingFaceEmbeddings(
         model_name="sentence-transformers/all-MiniLM-L6-v2",
-        model_kwargs={'device': 'cuda'},  # Use 'cuda' if you have GPU
+        model_kwargs={'device': device},
         encode_kwargs={'normalize_embeddings': True},
     )
     vectorstore = FAISS.load_local(VECTORSTORE_PATH, embeddings, allow_dangerous_deserialization=True)
     print("已从本地加载向量库")
-    return vectorstore  # 替换这一行
+    return vectorstore
+
+if __name__ == "__main__":
+    from loader import load_documents, split_documents
+    docs = load_documents("data")
+    chunks = split_documents(docs)
+    build_vectorstore(chunks)

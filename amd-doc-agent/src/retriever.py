@@ -12,7 +12,7 @@ retriever.py - 检索逻辑
 进阶思考（做完基础版再考虑）：
 - MMR (Maximal Marginal Relevance)：在相关性基础上增加多样性，避免返回重复内容
 """
-from langchain_deepseek import ChatDeepSeek
+from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 import os
 
@@ -33,11 +33,9 @@ def get_retriever(vectorstore, k: int = 4):
     Returns:
         retriever
     """
-    # TODO: 用 vectorstore.as_retriever() 创建检索器
-    # 提示：search_kwargs={"k": k} 控制返回数量
     retriever = vectorstore.as_retriever(
         search_kwargs = {"k": k}
-    )  # 替换这一行
+    )
 
     return retriever
 
@@ -54,23 +52,19 @@ def search(vectorstore, query: str, k: int = 4) -> list:
     Returns:
         List[Document]
     """
-    # TODO: 用 vectorstore.similarity_search(query, k=k)
-    results = vectorstore.similarity_search(query, k=k)  # 替换这一行
-
-    # 打印结果（调试用）
-    for i, doc in enumerate(results):
-        print(f"\n--- 第 {i+1} 个相关片段 ---")
-        print(doc.page_content[:200])  # 只打印前200字
-
+    results = vectorstore.similarity_search(query, k=k)
     return results
 
 
 def retrieve_multilingual(vectorstore, query: str, k: int = 4) -> list:
-    llm = ChatDeepSeek(model= "deepseek-chat", api_key = os.getenv('DEEPSEEK_API_KEY'), temperature=0)
+    llm = ChatOpenAI(
+        model= "deepseek-chat", 
+        api_key = os.getenv('DEEPSEEK_API_KEY'),
+        base_url="https://api.deepseek.com",
+        temperature=0)
     prompt = ChatPromptTemplate.from_template(TRANSLATE_PROMPT)
     chain = prompt | llm
     response = chain.invoke({"question": query})
-    print(response.content)
     eng_query = response.content
     results = search(vectorstore, query, k=4)
     eng_results = search(vectorstore, eng_query, k=4)
