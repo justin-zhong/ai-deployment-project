@@ -1,0 +1,19 @@
+# Core LangChain stack
+
+langchain==1.2.0
+langchain-core==1.2.4
+langchain-community==0.4.1
+langchain-openai==1.1.6
+langchain-huggingface==1.2.0
+langchain-text-splitters==1.1.0
+
+langgraph==1.0.10
+langgraph-prebuilt==1.0.10
+
+# Hugging Face ecosystem (compatible set)
+
+transformers==4.41.2
+huggingface-hub==0.34.6
+sentence-transformers==3.0.1
+
+faiss-cpu==1.13.2

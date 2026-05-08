@@ -1,13 +1,14 @@
 from langgraph.graph import StateGraph, MessagesState, START, END
-from langgraph.prebuilt import ToolNode, tools_condition
+from langgraph.prebuilt.tool_node import ToolNode, tools_condition
 from langchain_openai import ChatOpenAI
-
 from tools.bif_generator import generate_bif
 from tools.rag_tool import rag_search
 from tools.device_comparator import compare_devices
 from tools.command_validator import validate_command
-
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 API_KEY = os.getenv("DEEPSEEK_API_KEY")
 

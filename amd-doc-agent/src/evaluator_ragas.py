@@ -8,9 +8,9 @@ from ragas.embeddings import LangchainEmbeddingsWrapper
 from langchain_openai import ChatOpenAI
 from langchain_community.embeddings import HuggingFaceEmbeddings
 
-from retriever import get_retriever, search
-from chain import build_rag_chain, ask
-from embedder import load_vectorstore
+from .retriever import get_retriever, search
+from .chain import build_rag_chain, ask
+from .embedder import load_vectorstore
 
 TEST_CASES = [
     {

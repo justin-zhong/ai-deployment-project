@@ -1,4 +1,4 @@
-from langchain.tools import tool
+from langchain_core.tools import tool
 import sys
 sys.path.append("../rag-knowledge-bot")  # 指向项目2的路径
 from src.embedder import load_vectorstore

@@ -1,8 +1,17 @@
+---
+title: AMD Doc Agent
+emoji: 🤖
+colorFrom: red
+colorTo: blue
+sdk: docker
+pinned: false
+---
+
 # 🔍 项目4：AMD 技术文档多文档问答系统
 
-> **项目系列**：[项目1: 基础RAG](../rag-knowledge-bot) → [项目2: 垂直领域RAG](../rag-knowledge-bot) → [项目3: Bootgen Agent](../bootgen-agent) → **项目4: 多文档RAG + 部署（当前）**
+> **项目系列**：[项目1+2: RAG知识库](../rag-knowledge-bot) → [项目3: Bootgen Agent](../bootgen-agent) → **项目4: 多文档RAG + 部署（当前）**
 
-基于 RAG（检索增强生成）的多文档知识库问答系统，专为 AMD FPGA/SoC 技术文档设计。在前序项目基础上新增多文档支持、多语言检索、RAGAS 评估框架和云端部署。
+基于 RAG（检索增强生成）的多文档知识库问答系统，专为 AMD FPGA/SoC 技术文档设计。在前序项目基础上新增多文档支持、多语言检索、RAGAS 评估框架、FastAPI 后端和 Redis 缓存。
 
 🚀 **Live Demo**: [https://huggingface.co/spaces/chongyuanz/amd-doc-agent](https://huggingface.co/spaces/chongyuanz/amd-doc-agent)
 
@@ -35,6 +44,12 @@
 **来源标注**
 每个 chunk 携带 `metadata["source"]`，Prompt 中要求 LLM 回答时注明来源文档，回答可追溯。
 
+**FastAPI 后端**
+除 Streamlit UI 外，同时提供 RESTful API 接口，支持系统集成。响应中包含 `answer`、`question`、`sources` 三个字段，并通过中间件记录每次请求的响应时间。
+
+**Redis 缓存**
+相同问题第二次请求直接返回缓存结果，响应时间从 ~13 秒降至 ~0.005 秒（2600 倍提升）。缓存 key 经过文本标准化处理（转小写、去空格），避免同义重复请求穿透缓存。
+
 **RAGAS 评估框架**
 使用 RAGAS 对系统质量进行量化评估，相比项目2的关键词匹配更能捕捉语义层面的质量问题。
 
@@ -55,6 +70,8 @@ Docker 容器化，部署于 Hugging Face Spaces（CPU Free tier），公网可�
 - **DeepSeek** — LLM 生成（成本低，效果好）
 - **FAISS** — 本地向量数据库
 - **RAGAS** — RAG 系统评估框架
+- **FastAPI** — RESTful API 后端
+- **Redis** — 响应缓存
 - **Streamlit** — Web UI
 - **Docker** — 容器化部署
 - **Hugging Face Spaces** — 云端托管
@@ -62,13 +79,20 @@ Docker 容器化，部署于 Hugging Face Spaces（CPU Free tier），公网可�
 ## 快速开始
 
 ```bash
-# 本地运行
+# 本地运行（Streamlit）
 pip install -r requirements.txt
 cp .env.example .env
 # 填入 OPENAI_API_KEY 和 DEEPSEEK_API_KEY
 streamlit run app.py
 
-# Docker 运行
+# 本地运行（FastAPI）
+uvicorn main:app --reload
+# 访问 http://localhost:8000/docs 查看交互式 API 文档
+
+# 启动 Redis（需要 Docker）
+docker run -d -p 6379:6379 redis
+
+# Docker 运行（完整应用）
 docker build -t amd-doc-agent .
 docker run -p 8501:8501 \
   -e OPENAI_API_KEY=your_key \
@@ -87,6 +111,8 @@ docker run -p 8501:8501 \
 │   ├── chain.py           # RAG 链组装（含来源标注 Prompt）
 │   ├── evaluator.py       # 关键词匹配评估（基础版）
 │   └── evaluator_ragas.py # RAGAS 评估框架（进阶版）
+├── main.py                # FastAPI 入口（RESTful API + Redis 缓存）
+├── cache.py               # Redis 缓存逻辑
 ├── app.py                 # Streamlit 入口
 ├── Dockerfile
 ├── requirements.txt
@@ -97,25 +123,17 @@ docker run -p 8501:8501 \
 
 ```
 项目1: 基础 RAG
-  · 单文档（PDF/TXT）
-  · 本地运行
-  · 关键词匹配评估
+  · 单文档（PDF/TXT）、本地运行、关键词匹配评估
     ↓ 加入垂直领域 + PDF噪音清洗
 项目2: AMD Bootgen 专属问答
-  · UG1283 单文档
-  · PDF噪音清洗（正则）
-  · 15题评估模块
-    ↓ 加入 Agent + 工具调用
+  · UG1283 单文档、PDF噪音清洗、15题评估模块
+    ↓ 加入 Agent + 工具调用 + MCP + LangSmith
 项目3: Bootgen Agent
-  · LangChain Agent → LangGraph 重构
-  · 4个专属工具（RAG/BIF生成/命令校验/器件对比）
-  · MCP Server 封装
-    ↓ 加入多文档 + 多语言检索 + RAGAS + 部署
+  · LangChain Agent → LangGraph、4个专属工具、MCP Server、LangSmith追踪
+    ↓ 加入多文档 + 多语言检索 + RAGAS + FastAPI + Redis + 部署
 项目4: AMD 多文档问答系统（当前）
-  · 3份文档（中英文混合）
-  · Query Translation
-  · RAGAS 评估
-  · Docker + Hugging Face Spaces 部署
+  · 3份文档（中英文混合）、Query Translation、RAGAS评估
+  · FastAPI + Redis缓存、Docker + Hugging Face Spaces 部署
 ```
 
 ## 技术挑战与发现
@@ -128,6 +146,9 @@ docker run -p 8501:8501 \
 
 **评估框架的演进**
 项目2使用关键词匹配评估，简单但无法捕捉语义层面的质量问题。项目4引入 RAGAS，通过 Faithfulness 和 Context Precision 等指标量化评估，发现检索层是主要瓶颈，为后续优化指明方向。
+
+**Redis 缓存的实际效果**
+相同问题的响应时间从 13 秒（RAG 全流程）降至 0.005 秒（缓存命中），提升 2600 倍。通过文本标准化（转小写、去空格）处理同义重复请求，避免缓存穿透。
 
 ## 已知局限与后续方向
 
