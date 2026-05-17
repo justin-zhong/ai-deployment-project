@@ -1,98 +1,94 @@
-# AI Deployment Learning Project
+# AI Deployment Project
 
-> 从零开始学习 AI 模型部署与 RAG 应用的个人项目，目标岗位：AI 应用工程师 / 推理优化工程师。
+AMD FPGA/SoC 技术背景下的 AI 应用工程实践，涵盖 RAG、LangGraph Agent、MCP、FastAPI、Redis 缓存和云端部署。四个项目递进式构建，从基础 RAG 到生产级多文档问答系统。
 
-## 📁 项目结构
-ai-deployment-project/
-├── README.md # 项目说明
-├── .gitignore # Git 忽略文件
-├── A_W1D1.ipynb # 路径A：PyTorch MNIST 训练
-├── A_W1D2.ipynb # 路径A：推理 + 可视化
-├── A_W1D3.ipynb # 路径A：手写数字测试 + ONNX 导出
-├── A_W1D4.ipynb # 路径A：ONNX Runtime 推理 + 速度对比
-├── B_W1D1.ipynb # 路径B：RAG 概念 + 最简 Demo
-├── B_W1D2.ipynb # 路径B：LangChain + Chroma + 检索
-├── B_W1D3.ipynb # 路径B：完整 RAG（检索 + LLM 生成）
-├── B_W1D4.ipynb # 路径B：Agent 入门 + Tool 调用
-├── B_W1D5.ipynb # 路径B：Agent with Memory
-├── mnist_model.pth # PyTorch 训练好的模型（已忽略）
-├── mnist_model.onnx # ONNX 导出模型
-├── data/ # MNIST 数据集（已忽略）
-└── images/ # 图片文件
+## 项目概览
 
+| 项目 | 目录 | 核心技术 | 亮点 |
+|------|------|---------|------|
+| 项目1+2 | `rag-knowledge-bot/` | RAG、FAISS、LangChain | chunk调优、PDF噪音清洗、15题评估模块 |
+| 项目3 | `bootgen-agent/` | LangGraph、MCP、LangSmith | 4工具Agent、MCP Server、链路追踪 |
+| 项目4 | `amd-doc-agent/` | 多文档RAG、FastAPI、Redis | Query Translation、RAGAS评估、Hugging Face部署 |
 
-## 🚀 项目亮点
+🚀 **Live Demo（项目4）**：[https://huggingface.co/spaces/chongyuanz/amd-doc-agent](https://huggingface.co/spaces/chongyuanz/amd-doc-agent)
 
-### 路径A：模型推理与部署优化
-- ✅ 使用 PyTorch 训练 MNIST 手写数字识别模型，准确率 **97.8%**
-- ✅ 实现单张图片推理与可视化
-- ✅ 导出 ONNX 格式，使用 ONNX Runtime 推理
-- ✅ 速度对比：ONNX Runtime GPU vs CPU，加速比 **1.56x**
-- ✅ TensorRT FP16 量化（Google Colab），模型大小减少 **51%**
+---
 
-### 路径B：RAG 与 Agent
-- ✅ 理解 RAG（检索增强生成）核心流程
-- ✅ 使用 LangChain + Chroma + HuggingFace Embeddings 构建 RAG Demo
-- ✅ 实验检索参数 `k` 对召回结果的影响
-- ✅ 接入 DeepSeek API 完成完整 RAG 问答
-- ✅ 理解 Agent 概念，实现 Tool Calling（加法、乘法、搜索）
-- ✅ 实现带 Memory 的多轮对话 Agent
+## 项目演进
 
-## 📊 关键结果
+```
+项目1: 基础 RAG
+  · 单文档（PDF/TXT）问答，验证完整 RAG 流程
+  · chunk_size/overlap 参数调优实验
+    ↓
+项目2: 垂直领域 RAG（AMD UG1283）
+  · PDF 噪音清洗（页眉/页脚/页码正则过滤）
+  · 15道测试题 + 关键词匹配评估模块
+  · 系统分析技术文档 RAG 的检索局限性
+    ↓
+项目3: Bootgen 智能助手 Agent
+  · LangChain Agent → LangGraph 重构（黑盒→状态图）
+  · 4个专属工具：RAG检索 / BIF生成 / 命令校验 / 器件对比
+  · MCP Server 封装，支持 Claude Desktop 等客户端调用
+  · LangSmith 集成，Agent 链路完整可观测
+    ↓
+项目4: AMD 多文档问答系统（已部署）
+  · 3份文档（UG1283中文 + UG1085/UG1137英文）跨文档检索
+  · Query Translation 解决中英文检索偏差
+  · RAGAS 评估框架（Faithfulness / Context Precision）
+  · FastAPI RESTful API + Redis 缓存（响应从13s降至0.005s）
+  · Docker 容器化，部署至 Hugging Face Spaces
+```
 
-| 测试项 | 结果 |
-|--------|------|
-| PyTorch 推理速度（GPU） | 0.560 ms/张 |
-| ONNX Runtime 推理速度（GPU） | 0.360 ms/张 |
-| 加速比 | **1.56x** |
-| ONNX → TensorRT FP16 模型大小 | 4.6MB → 2.4MB（**-51%**） |
-| RAG 检索准确率 | 3个chunk独立检索 |
-| Agent Memory | 支持多轮对话 |
+---
 
-## 🛠️ 环境要求
+## 技术栈总览
+
+| 类别 | 技术 |
+|------|------|
+| RAG 框架 | LangChain、FAISS |
+| Agent 框架 | LangGraph、LangChain Agent |
+| 工具协议 | MCP（Model Context Protocol） |
+| LLM | DeepSeek、OpenAI |
+| 评估 | RAGAS、关键词匹配 |
+| 后端 | FastAPI |
+| 缓存 | Redis |
+| 可观测性 | LangSmith |
+| 部署 | Docker、Hugging Face Spaces |
+
+---
+
+## 快速开始
+
+每个子项目有独立的 `README.md` 和 `requirements.txt`，进入对应目录查看详细说明：
 
 ```bash
-Python 3.8+
-PyTorch 2.5.1
-ONNX Runtime 1.20+
-LangChain 1.0+
+# 项目1+2
+cd rag-knowledge-bot && pip install -r requirements.txt
+streamlit run app.py
 
-# 克隆仓库
-git clone https://github.com/justin-zhong/ai-deployment-project.git
-cd ai-deployment-project
+# 项目3
+cd bootgen-agent && pip install -r requirements.txt
+streamlit run app.py          # Streamlit UI
+mcp dev mcp_server.py         # MCP Server
 
-# 安装依赖
-pip install torch torchvision onnxruntime langchain langchain-openai
+# 项目4
+cd amd-doc-agent && pip install -r requirements.txt
+streamlit run app.py          # Streamlit UI
+uvicorn main:app --reload     # FastAPI
+```
 
-# 运行 Jupyter
-jupyter lab
+所有项目需要配置 `.env` 文件，参考各目录下的 `.env.example`。
 
-推理优化心得
-小模型（如 MNIST）GPU 加速比不高，因为 GPU 启动开销占比大
+---
 
-大模型（如 ResNet50）GPU 加速比可达 10-50x
+## 关键技术发现
 
-FP16 量化能有效减少模型大小和显存占用
+**RAG vs Agent**
+对于有明确输入输出的结构化任务（BIF生成、命令校验、器件对比），确定性工具的效果远好于 RAG 检索。RAG 适合开放性文档查询，工具适合结构化任务。
 
-RAG 调优心得
-k 值太小会漏掉答案，太大会引入噪声
+**中英文混合知识库**
+OpenAI embedding 对中文问题和英文 chunk 的向量距离天然偏大，导致英文文档被系统性忽略。通过 Query Translation 双语并行检索有效解决。
 
-问题表述对检索质量影响巨大
-
-需要在 prompt 中限制 LLM 只使用知识库内容
-
-🔗 相关资源
-PyTorch 官方教程
-
-ONNX Runtime 文档
-
-LangChain 文档
-
-DeepSeek API
-
-📧 联系我
-GitHub: justin-zhong
-
-Email: zhongchongyuan1999@gmail.com
-
-持续更新中...
+**Redis 缓存效果**
+相同问题的响应时间从 13 秒（RAG 全流程）降至 0.005 秒（缓存命中），提升约 2600 倍。
