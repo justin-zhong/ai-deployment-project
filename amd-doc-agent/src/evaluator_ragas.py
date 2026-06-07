@@ -1,4 +1,3 @@
-# evaluator_ragas.py
 import os
 from datasets import Dataset
 from ragas import evaluate
@@ -60,7 +59,6 @@ TEST_CASES = [
 ]
 
 def run_ragas_evaluation():
-    # 1. 初始化
     vs = load_vectorstore()
     retriever = get_retriever(vs)
     chain = build_rag_chain(retriever, vs)
@@ -70,12 +68,8 @@ def run_ragas_evaluation():
     for case in TEST_CASES:
         q = case["question"]
         
-        # 方案B：分两步
-        # TODO: 第一步，用 search() 拿到 chunks
         chunks = search(vs, q, 4)
-        # TODO: 第二步，用 ask() 拿到回答
         answer = ask(chain, q)
-        # TODO: 把 chunk 的 page_content 提取成字符串列表
         chunk_texts = [chunk_text.page_content for chunk_text in chunks]
         
         questions.append(q)
@@ -83,7 +77,6 @@ def run_ragas_evaluation():
         contexts.append(chunk_texts)
         ground_truths.append(case["ground_truth"])
     
-    # 2. 构建 dataset
     dataset = Dataset.from_dict({
         "question": questions,
         "answer": answers,
@@ -91,8 +84,6 @@ def run_ragas_evaluation():
         "ground_truth": ground_truths
     })
     
-    # 3. 配置 RAGAS
-    # TODO: 初始化 llm 和 embeddings
     llm = LangchainLLMWrapper(ChatOpenAI(
         model="deepseek-chat",
         api_key=os.getenv("DEEPSEEK_API_KEY"),
@@ -105,7 +96,6 @@ def run_ragas_evaluation():
         encode_kwargs={'normalize_embeddings': True},
     ))
     
-    # 4. 运行评估
     result = evaluate(
         dataset,
         metrics=[faithfulness, context_precision],
@@ -115,6 +105,3 @@ def run_ragas_evaluation():
     
     print(result)
     return result
-
-if __name__ == "__main__":
-    run_ragas_evaluation()

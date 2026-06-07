@@ -1,4 +1,3 @@
-# evaluator.py
 from .chain import ask
 
 TEST_CASES = [
@@ -56,28 +55,16 @@ TEST_CASES = [
 
 
 def evaluate(chain) -> dict:
-    """
-    运行所有测试用例，返回评估报告
-    """
     scores = {}
     for case in TEST_CASES:
         result = ask(chain, case["question"])
         found = len([word for word in case["keywords"] if word in result])
         num_keywords = len(case["keywords"])
-        if __debug__:
-            print(found, num_keywords) #for debug
         percentage = float(found)/num_keywords
-        if __debug__:
-            print(percentage) #for debug
         scores[case["question"]] = [result[:101], percentage]
-    if __debug__:
-        print(scores)
     return scores
 
 def print_report(results: dict):
-    """
-    打印每道题的得分和整体准确率
-    """
     total_score = 0.0
     for key,value in results.items():
         total_score += value[1]

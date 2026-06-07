@@ -8,12 +8,17 @@ from src.chain import build_rag_chain, ask
 import redis
 from cache import get_cache, set_cache
 
+import pickle
+
 r = redis.Redis(host="localhost", port=6379, db=0)
 
 app = FastAPI(title="AMD Doc Agent API")
 
+with open("vectorstore/chunks.pkl", "rb") as f:
+    chunks = pickle.load(f)
+
 vs = load_vectorstore()
-retriever = get_retriever(vs)
+retriever = get_retriever(vs, chunks)
 chain = build_rag_chain(retriever, vs)
 
 class QuestionRequest(BaseModel):
