@@ -32,7 +32,7 @@ with st.sidebar:
     if st.button("运行评估", use_container_width=True):
         with st.spinner(""):
             retriever = get_retriever(st.session_state.vectorstore, st.session_state.chunks)
-            chain = build_rag_chain(retriever, st.session_state.vectorstore)
+            chain = build_rag_chain(retriever, st.session_state.vectorstore, st.session_state.chunks)
             test_report = evaluate(chain)
             print_report(test_report)
         st.success(f"✅ 已运行评估")
@@ -61,7 +61,7 @@ if question := st.chat_input("请输入你的问题..."):
         with st.chat_message("assistant"):
             with st.spinner("思考中..."):
                 retriever = get_retriever(st.session_state.vectorstore, st.session_state.chunks)
-                chain = build_rag_chain(retriever, st.session_state.vectorstore)
+                chain = build_rag_chain(retriever, st.session_state.vectorstore, st.session_state.chunks)
                 answer = ask(chain, question)
             st.write(answer)
 

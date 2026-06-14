@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel
 import time
 from src.embedder import load_vectorstore
-from src.retriever import get_retriever, search
+from src.retriever import get_retriever, retrieve_multilingual
 from src.chain import build_rag_chain, ask
 
 import redis
@@ -19,7 +19,7 @@ with open("vectorstore/chunks.pkl", "rb") as f:
 
 vs = load_vectorstore()
 retriever = get_retriever(vs, chunks)
-chain = build_rag_chain(retriever, vs)
+chain = build_rag_chain(retriever, vs, chunks)
 
 class QuestionRequest(BaseModel):
     question: str
@@ -47,7 +47,7 @@ def ask_question(request: QuestionRequest):
     if cached:
         return AnswerResponse(**cached)
     try:
-        chunks = search(vs, request.question, k=4)
+        chunks = retrieve_multilingual(vs, request.question, k=4)
         sources = {chunk.metadata["source"] for chunk in chunks}
         answer = ask(chain, request.question)
 

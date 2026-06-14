@@ -58,6 +58,15 @@ pinned: false
 | Faithfulness | 0.23 | 回答与检索内容的一致性 |
 | Context Precision | 0.10 | 检索 chunk 与问题的相关性 |
 
+| 指标 | 纯向量检索（基础版） | 混合检索 + Query Translation | 提升 |
+|------|------------------|--------------------------|------|
+| Faithfulness | 0.39 | **0.80** | +105% |
+| Answer Relevancy | 0.54 | 0.50 | - |
+| Context Precision | 0.06 | **0.16** | +171% |
+
+引入 BM25 混合检索后，Faithfulness 提升 105%，Context Precision 提升 171%，
+幻觉问题显著改善。
+
 分数偏低的根本原因在于检索层质量——PDF 噪音清洗后仍有残留，且中文问题与英文文档存在语义匹配偏差。这是后续优化的主要方向。
 
 **云端部署**

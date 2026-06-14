@@ -7,9 +7,11 @@ from ragas.embeddings import LangchainEmbeddingsWrapper
 from langchain_openai import ChatOpenAI
 from langchain_community.embeddings import HuggingFaceEmbeddings
 
-from .retriever import get_retriever, search
-from .chain import build_rag_chain, ask
-from .embedder import load_vectorstore
+from retriever import get_retriever, search, retrieve_multilingual
+from chain import build_rag_chain, ask
+from embedder import load_vectorstore
+
+import numpy as np
 
 TEST_CASES = [
     {
@@ -58,17 +60,30 @@ TEST_CASES = [
     },
 ]
 
-def run_ragas_evaluation():
+def run_ragas_evaluation(use_multilingual: bool = False):
     vs = load_vectorstore()
-    retriever = get_retriever(vs)
-    chain = build_rag_chain(retriever, vs)
+
+    document_chunks = None
+    
+    if use_multilingual:
+        import pickle
+        with open("vectorstore/chunks.pkl", "rb") as f:
+            document_chunks = pickle.load(f)
+        retriever = get_retriever(vs, document_chunks, k=4)
+    else:
+        retriever = get_retriever(vs)
+        
+    chain = build_rag_chain(retriever, vs, document_chunks)
     
     questions, answers, contexts, ground_truths = [], [], [], []
     
     for case in TEST_CASES:
         q = case["question"]
-        
-        chunks = search(vs, q, 4)
+
+        if use_multilingual:
+            chunks = retrieve_multilingual(vs, document_chunks, q, k=4)
+        else:
+            chunks = search(vs, q, 4)
         answer = ask(chain, q)
         chunk_texts = [chunk_text.page_content for chunk_text in chunks]
         
@@ -88,6 +103,7 @@ def run_ragas_evaluation():
         model="deepseek-chat",
         api_key=os.getenv("DEEPSEEK_API_KEY"),
         base_url="https://api.deepseek.com",
+        temperature=0,
         n=1
     ))
     embeddings = LangchainEmbeddingsWrapper(HuggingFaceEmbeddings(
@@ -98,10 +114,22 @@ def run_ragas_evaluation():
     
     result = evaluate(
         dataset,
-        metrics=[faithfulness, context_precision],
+        metrics=[faithfulness, answer_relevancy, context_precision],
         llm=llm,
         embeddings=embeddings
     )
     
     print(result)
     return result
+
+if __name__ == "__main__":
+    print("=== 旧版：纯向量检索 ===")
+    result_old = run_ragas_evaluation(use_multilingual=False)
+    
+    print("\n=== 新版：混合检索 + Query Translation ===")
+    result_new = run_ragas_evaluation(use_multilingual=True)
+    
+    print("\n=== 对比 ===")
+    print(f"Faithfulness:      {result_old['faithfulness']:.4f} → {result_new['faithfulness']:.4f}")
+    print(f"Answer Relevancy:      {result_old['answer_relevancy']:.4f} → {result_new['answer_relevancy']:.4f}")
+    print(f"Context Precision: {result_old['context_precision']:.4f} → {result_new['context_precision']:.4f}")

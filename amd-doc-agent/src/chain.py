@@ -2,7 +2,7 @@ from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough, RunnableLambda
 from langchain_core.output_parsers import StrOutputParser
-from .retriever import retrieve_multilingual
+from retriever import retrieve_multilingual
 import os
 
 PROMPT_TEMPLATE = """
@@ -22,7 +22,7 @@ def format_docs(docs) -> str:
     return "\n\n".join([f"{doc.metadata['source']}\n{doc.page_content}" for doc in docs])
 
 
-def build_rag_chain(retriever, vs):
+def build_rag_chain(retriever, vs, chunks):
     llm = ChatOpenAI(
         model="deepseek-chat",
         api_key=os.getenv("DEEPSEEK_API_KEY"),
@@ -32,7 +32,7 @@ def build_rag_chain(retriever, vs):
 
     prompt = ChatPromptTemplate.from_template(PROMPT_TEMPLATE)
 
-    multilingual_retriever = RunnableLambda(lambda q: retrieve_multilingual(vs, q, k=4))
+    multilingual_retriever = RunnableLambda(lambda q: retrieve_multilingual(vs, chunks, q, k=4))
     
     chain = (
      {"context": multilingual_retriever | format_docs,

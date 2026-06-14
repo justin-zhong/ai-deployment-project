@@ -10,10 +10,14 @@ TRANSLATE_PROMPT = """
 问题：{question}
 """
 
-def get_retriever(vectorstore, chunks: list, k: int = 4):
+def get_retriever(vectorstore, chunks: list = [], k: int = 4):
     vectorRetriever = vectorstore.as_retriever(
         search_kwargs = {"k": k}
     )
+
+    if not chunks:
+        return vectorRetriever
+        
     bm25Retriever = BM25Retriever.from_documents(chunks, k=k)
 
     retriever = EnsembleRetriever(
@@ -30,7 +34,7 @@ def search(vectorstore, query: str, k: int = 4) -> list:
     return results
 
 
-def retrieve_multilingual(vectorstore, query: str, k: int = 4) -> list:
+def retrieve_multilingual(vectorstore, chunks: list, query: str, k: int = 4) -> list:
     llm = ChatOpenAI(
         model= "deepseek-chat", 
         api_key = os.getenv('DEEPSEEK_API_KEY'),
@@ -40,8 +44,11 @@ def retrieve_multilingual(vectorstore, query: str, k: int = 4) -> list:
     chain = prompt | llm
     response = chain.invoke({"question": query})
     eng_query = response.content
-    results = search(vectorstore, query, k=4)
-    eng_results = search(vectorstore, eng_query, k=4)
+
+    retriever = get_retriever(vectorstore, chunks, k=k)
+    results = retriever.invoke(query)
+    eng_results = retriever.invoke(eng_query)
+    
     all_results = [item for pair in zip(results, eng_results) for item in pair]
     seen = set()
     unique_results = []
@@ -49,4 +56,4 @@ def retrieve_multilingual(vectorstore, query: str, k: int = 4) -> list:
         if doc.page_content not in seen:
             seen.add(doc.page_content)
             unique_results.append(doc)
-    return unique_results
+    return unique_results[:k]
