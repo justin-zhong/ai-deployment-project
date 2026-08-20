@@ -1,3 +1,5 @@
+[English](README.md) | [中文](README_CN.md)
+
 # 📚 Project 1 + Project 2: AMD Bootgen Technical Document Q&A Bot
 
 > **Project Series:** **Projects 1–2: RAG Knowledge Base (Current)** → [Project 3: Bootgen Agent](../bootgen-agent) → [Project 4: Multi-Document RAG + Deployment](../amd-doc-agent)

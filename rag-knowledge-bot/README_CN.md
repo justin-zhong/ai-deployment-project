@@ -1,3 +1,5 @@
+[English](README.md) | **中文**
+
 # 📚 项目1+项目2：AMD Bootgen 技术文档问答机器人
 
 > **项目系列**：**项目1+2: RAG知识库（当前）** → [项目3: Bootgen Agent](../bootgen-agent) → [项目4: 多文档RAG + 部署](../amd-doc-agent)
