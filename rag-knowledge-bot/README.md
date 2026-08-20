@@ -1,107 +1,153 @@
-# 📚 项目1+项目2：AMD Bootgen 技术文档问答机器人
+# 📚 Project 1 + Project 2: AMD Bootgen Technical Document Q&A Bot
 
-> **项目系列**：**项目1+2: RAG知识库（当前）** → [项目3: Bootgen Agent](../bootgen-agent) → [项目4: 多文档RAG + 部署](../amd-doc-agent)
+> **Project Series:** **Projects 1–2: RAG Knowledge Base (Current)** → [Project 3: Bootgen Agent](../bootgen-agent) → [Project 4: Multi-Document RAG + Deployment](../amd-doc-agent)
 
-基于 RAG（检索增强生成）的垂直领域知识库问答系统，专为 AMD FPGA/SoC 技术文档设计。当前知识库基于 UG1283 Bootgen 用户指南（2025.2），支持用自然语言查询启动镜像生成、BIF 语法、加密认证等技术问题。
+A domain-specific RAG (Retrieval-Augmented Generation) knowledge base designed for AMD FPGA/SoC technical documentation. The current knowledge base is based on the UG1283 Bootgen User Guide (2025.2) and supports natural-language queries about boot image generation, BIF syntax, encryption, authentication, and other Bootgen-related topics.
 
-- **项目1**：通用 RAG 基础实现，验证完整的检索-生成流程，完成 chunk 参数调优
-- **项目2**：迁移至 UG1283 真实技术文档，加入 PDF 噪音清洗、评估模块，系统分析 RAG 在技术文档场景下的局限性
+- **Project 1:** Built a general-purpose RAG pipeline to validate the end-to-end retrieval and generation workflow and experiment with chunking parameters.
+- **Project 2:** Applied the RAG pipeline to the real-world UG1283 technical documentation, adding PDF noise cleaning and an evaluation module to systematically analyze the limitations of RAG for technical documentation.
 
 ## Demo
 
-> 问：authentication 在引导中的角色是什么？
+> **Q:** What role does authentication play during the boot process?
 >
-> 答：认证（authentication）在引导过程中用于确保分区（包括报头表）的完整性和来源可信性。具体通过为分区启用身份验证并指定 PPK（主公钥）实现，分区使用 SSK 来签名，签名填充到 AC 中，PPK 将散列化并存储在 eFUSE 中。
+> **A:** Authentication ensures the integrity and authenticity of partitions, including the header table, during the boot process. It is enabled by configuring authentication for partitions and specifying a PPK (Primary Public Key). Partitions are signed using an SSK, with the signature stored in the Authentication Certificate (AC), while the hash of the PPK is stored in eFUSE.
 
-> 问：如何在命令行使用 bootgen？
+> **Q:** How do I use Bootgen from the command line?
 >
-> 答：在命令行中使用 Bootgen 的基本语法为 `bootgen -arch <架构> -image <bif文件> -o <输出文件>`，例如 `bootgen -arch zynqmp -image test.bif -w -o boot.bin`。
+> **A:** The basic Bootgen command-line syntax is `bootgen -arch <architecture> -image <bif_file> -o <output_file>`. For example: `bootgen -arch zynqmp -image test.bif -w -o boot.bin`.
 
-## 技术栈
+## Tech Stack
 
-- **LangChain** — RAG 框架（文档加载、切分、检索链）
-- **OpenAI** — text-embedding-ada-002 向量化 + GPT-4o-mini 生成
-- **FAISS** — 本地向量数据库，支持持久化
+- **LangChain** — RAG framework for document loading, text splitting, and retrieval chains
+- **OpenAI** — `text-embedding-ada-002` embeddings + GPT-4o-mini generation
+- **FAISS** — Local vector store with persistence support
 - **Streamlit** — Web UI
 
-## 快速开始
+## Quick Start
 
 ```bash
-# 1. 安装依赖
+# 1. Install dependencies
 pip install -r requirements.txt
 
-# 2. 配置 API Key
+# 2. Configure API key
 cp .env.example .env
-# 编辑 .env，填入你的 OPENAI_API_KEY
+# Edit .env and add your OPENAI_API_KEY
 
-# 3. 放入文档（支持 PDF、TXT）
+# 3. Add documents (PDF or TXT)
 cp your_docs.pdf data/
 
-# 4. 启动
+# 4. Start the application
 streamlit run app.py
 ```
 
-启动后在左侧点击「加载并索引文档」，完成后即可在右侧提问。
+After starting the application, click "Load & Index Documents" in the
+sidebar. Once indexing is complete, you can ask questions through the chat
+interface.
 
-## 项目结构
+## Project Structure
 
 ```
-├── data/               # 知识库文档（当前：UG1283 Bootgen 用户指南）
+├── data/               # Knowledge base documents (currently UG1283 Bootgen User Guide)
 ├── src/
-│   ├── loader.py       # 文档加载、PDF 噪音清洗与 chunk 切分
-│   ├── embedder.py     # 向量化与 FAISS 存储
-│   ├── retriever.py    # 相似度检索
-│   ├── chain.py        # RAG 链组装（Prompt + LLM）
-│   └── evaluator.py    # 自动评估模块（15道测试题 + 关键词匹配评分）
-├── app.py              # Streamlit 入口（含评估面板）
-├── vectorstore/        # 向量库持久化（自动生成）
+│   ├── loader.py       # Document loading, PDF noise cleaning, and chunking
+│   ├── embedder.py     # Embedding generation and FAISS storage
+│   ├── retriever.py    # Similarity search
+│   ├── chain.py        # RAG chain assembly (Prompt + LLM)
+│   └── evaluator.py    # Automated evaluation (15 test questions + keyword matching)
+├── app.py              # Streamlit entry point with evaluation dashboard
+├── vectorstore/        # Persisted vector store (automatically generated)
 └── requirements.txt
 ```
 
-## RAG 工作流程
+## RAG Workflow
 
 ```
-【离线索引】
-文档（PDF/TXT）→ 切分 chunk → Embedding 向量化 → 存入 FAISS
+【Offline Indexing】
+Document (PDF/TXT)
+        ↓
+Chunking
+        ↓
+Embedding Generation
+        ↓
+FAISS Vector Store
 
-【在线查询】
-用户提问 → Embedding 向量化 → FAISS 相似度检索 → top-k chunk
-                                                        ↓
-                                           拼入 Prompt → LLM → 回答
+【Online Query】
+User Query
+    ↓
+Query Embedding
+    ↓
+FAISS Similarity Search
+    ↓
+Top-k Chunks
+    ↓
+Prompt Construction
+    ↓
+LLM
+    ↓
+Answer
 ```
 
-## 参数调优记录
+## Chunking Parameter Experiments
 
-在开发过程中，通过实验发现 chunk 切分参数对检索质量影响显著。以下是针对同一问题（"调试技巧有哪些？"）在不同参数下的表现：
+During development, experiments showed that chunking parameters have a
+significant impact on retrieval quality. The following results were obtained
+for the same question, "What are the debugging techniques?", using
+different chunking configurations:
 
-| chunk_size | chunk_overlap | 结果 |
+| chunk_size | chunk_overlap | Result |
 |-----------|--------------|------|
-| 500 | 50 | ❌ 回答"没有找到相关信息" |
-| 500 | 150 | ✅ 能回答，但内容不完整（2/3条） |
-| 800 | 100 | ✅ 回答完整，并能主动关联相关内容 |
+| 500 | 50 | ❌ Failed to retrieve relevant information |
+| 500 | 150 | ✅ Answered the question, but incompletely (2 of 3 items) |
+| 800 | 100 | ✅ Complete answer with relevant related information |
 
-**结论：** chunk_size 影响语义完整性，chunk_overlap 是补救边界截断的手段。优先保证单个 chunk 能装下一个完整的语义单元，overlap 只用于减少边界损失。本项目最终采用 `chunk_size=800, chunk_overlap=100`。
+**Conclusion：** chunk_size primarily affects semantic completeness, while
+chunk_overlap helps reduce information loss at chunk boundaries. The
+preferred approach is to ensure that each chunk contains a complete semantic
+unit and use overlap to mitigate boundary truncation.
 
-**调试方法：** 通过 `retriever.py` 中的 `search()` 函数直接打印检索结果，可以快速判断问题出在检索层还是生成层，避免盲目调整 Prompt。
+The final configuration for this project is:
 
-## 技术文档 RAG 的挑战与发现
+chunk_size = 800
+chunk_overlap = 100
 
-将通用 RAG 系统迁移到 AMD UG1283 等专业技术文档时，遇到了以下问题并逐一排查：
+**Debugging approach：** The search() function in retriever.py can be used
+to directly inspect retrieved chunks. This makes it possible to quickly
+determine whether an issue originates from the retrieval or generation layer,
+rather than blindly modifying the prompt.
 
-| 问题 | 根本原因 | 解决方案 | 结果 |
+## Challenges and Findings with Technical Document RAG
+
+When adapting the general-purpose RAG system to specialized technical
+documentation such as AMD UG1283, several issues were identified and
+investigated:
+
+| Issue | Root Cause | Solution | Result |
 |------|---------|---------|------|
-| 大量内容检索失败 | PDF 页眉页脚噪音（页码、文档编号、"Send Feedback"）混入 chunk | 正则清洗三类噪音模式 + 跳过前6页封面目录 | chunk 从 636 降至 559，噪音显著减少 |
-| 部分内容仍检索不到 | chunk 跨越多个主题，语义被稀释 | 调整 chunk_size/overlap | 部分改善 |
-| 评估准确率偏低 | 用户问题措辞与文档术语风格不匹配 | 缩短问题、贴近文档原文术语 | 有所改善，但仍有差距 |
-| 检索区分度差 | 残留页脚反复出现，拉近了不相关 chunk 的向量距离 | — | 在项目4中通过 Query Translation 部分解决 |
+| Large amount of content could not be retrieved | PDF headers, footers, page numbers, document IDs, and "Send Feedback" text were included in chunks | Used regex-based cleaning for three types of PDF noise and skipped the first 6 cover/table-of-contents pages | Reduced chunks from 636 to 559 and significantly reduced noise |
+| Some content was still difficult to retrieve | Chunks covered multiple topics, diluting their semantic meaning | Adjusted chunk_size and chunk_overlap | Partial improvement |
+| Low evaluation accuracy | User questions did not match the terminology and writing style of the documentation | Shortened questions and aligned them more closely with document terminology | Some improvement, but gaps remained |
+| Poor retrieval discrimination | Repeated residual footer text reduced the distinction between relevant and irrelevant chunks | — | Partially addressed in Project 4 with Query Translation |
 
-**核心发现：** 技术文档 RAG 的瓶颈不在 LLM，而在数据质量和检索层。噪音清洗、chunk 策略、问题改写对最终效果的影响远大于更换更强的模型。
+**Key Finding：** For technical-document RAG, the primary bottleneck is often not the LLM, but
+data quality and the retrieval layer.
 
-**后续演进：** 项目4中引入了 Query Translation——检索前用 LLM 将用户问题翻译成英文，双语并行检索后合并结果，有效解决了中英文混合知识库的检索偏差问题。详见[项目4 README](../amd-doc-agent)。
+PDF noise cleaning, chunking strategy, and query formulation had a much larger
+impact on retrieval quality than simply switching to a more capable LLM.
 
-## 已知局限
+**Further Development：** Project 4 introduced Query Translation to address the multilingual
+retrieval problem. Before retrieval, an LLM translates the user's query into
+English, allowing the system to perform parallel Chinese and English
+retrieval and merge the results. See the [Project4 README](../amd-doc-agent) for details.
 
-- PDF 中的图表、多栏表格解析质量有限，部分内容可能丢失语义
-- 向量化使用 OpenAI API，需要联网和费用
-- 当前知识库仅含 UG1283，扩展多文档时建议替换为 Pinecone 等云端向量库
-- 检索区分度受残留页脚影响，考虑改用网页版文档加载（WebBaseLoader）以获得更干净的文本
+## Known Limitations
+
+- PDF charts and multi-column tables may not be parsed correctly, which can
+result in partial loss of semantic information.
+- Embeddings use the OpenAI API, requiring network access and incurring API
+costs.
+- The current knowledge base contains only UG1283. For larger multi-document
+deployments, a managed vector database such as Pinecone could be considered.
+- Retrieval quality can still be affected by residual PDF footer text.
+Loading documentation from web-based sources such as WebBaseLoader could
+provide cleaner source text.
