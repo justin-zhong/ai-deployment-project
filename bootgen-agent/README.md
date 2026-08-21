@@ -1,141 +1,214 @@
-# 🤖 项目3：Bootgen 智能助手 Agent
+[English](README.md) | [中文](README_CN.md)
 
-> **项目系列**：[项目1+2: RAG知识库](../rag-knowledge-bot) → **项目3: Bootgen Agent（当前）** → [项目4: 多文档RAG + 部署](../amd-doc-agent)
+# 🤖 Project 3: Bootgen Intelligent Assistant Agent
 
-基于 LangGraph 的 AMD Bootgen 专属助手。相比纯 RAG 方案，Agent 能主动决策调用哪个工具、按需链式执行多步操作，对结构化任务（BIF 生成、命令校验、器件对比）的回答质量显著优于检索方式。
+> **Project Series:** [Projects 1–2: RAG Knowledge Base](../rag-knowledge-bot) → **Project 3: Bootgen Agent (Current)** → [Project 4: Multi-Document RAG + Deployment](../amd-doc-agent)
+
+A domain-specific AI Agent for AMD Bootgen engineering workflows, built with
+LangGraph. Unlike a pure RAG system, the Agent can autonomously decide which
+tool to invoke and execute multiple tools in sequence as needed.
+
+For structured tasks such as BIF generation, command validation, and device
+comparison, the Agent provides more reliable results than relying on document
+retrieval alone.
 
 ## Demo
 
-> 用户：帮我为 zynqmp 生成一个包含 fsbl 和 application 的 BIF 文件，然后检查这个命令是否正确：`bootgen -arch zynqmp -image test.bif -o boot.bin`
+> **User:** Generate a BIF file for `zynqmp` containing FSBL and an application,
+> then check whether this command is valid:
+> `bootgen -arch zynqmp -image test.bif -o boot.bin`
 >
-> Agent：① 调用 `generate_bif` 生成 BIF 模板 → ② 调用 `check_command_syntax` 验证命令 → ③ 整合输出完整回答
+> **Agent:** ① Calls `generate_bif` to generate the BIF template → ② Calls
+> `check_command_syntax` to validate the command → ③ Combines the results into
+> a complete response
 
-## 工具列表
+## Tools
 
-| 工具 | 触发场景 | 实现方式 |
-|------|---------|---------|
-| `rag_search` | 查询 UG1283 文档内容（启动流程、属性说明等） | FAISS 向量检索 |
-| `generate_bif` | 根据器件和组件生成 BIF 文件模板 | 规则模板，支持 zynqmp / versal |
-| `check_command_syntax` | 验证 bootgen 命令行语法 | 规则校验（必填参数 + 合法值检查） |
-| `compare_devices` | 对比两个器件的配置差异 | 结构化查表 |
+| Tool | Trigger Scenario | Implementation |
+|---|---|---|
+| `rag_search` | Query UG1283 documentation, such as boot flows and attribute descriptions | FAISS vector search |
+| `generate_bif` | Generate a BIF file template based on device and components | Rule-based templates supporting `zynqmp` / `versal` |
+| `check_command_syntax` | Validate Bootgen command-line syntax | Rule-based validation of required parameters and valid values |
+| `compare_devices` | Compare configuration differences between two devices | Structured lookup |
 
-## 典型使用场景
+## Typical Use Cases
 
-**场景1：生成并验证启动镜像命令**
+### Scenario 1: Generate and Validate a Boot Image Command
+
 ```
-帮我为 zynqmp 生成包含 fsbl、pmu 和 application 的 BIF，
-并检查命令 bootgen -arch zynqmp -image test.bif -o boot.bin 是否正确
+Generate a BIF containing FSBL, PMU, and an application for zynqmp,
+and check whether the command
+bootgen -arch zynqmp -image test.bif -o boot.bin
+is valid.
 ```
 
-**场景2：器件选型对比**
+### Scenario 2: Device Comparison
 ```
-zynqmp 和 versal 在启动流程和组件上有什么区别？
+What are the differences between zynqmp and versal
+in terms of boot flow and supported components?
 ```
+The Agent uses compare_devices to retrieve structured device information and
+can combine it with rag_search when additional documentation context is
+required.
 
-**场景3：跨工具推理**
+### Scenario 3: Cross-Tool Reasoning
 ```
-如果把命令中的 zynqmp 改成 zynq，还正确吗？
+If I change zynqmp to zynq in the command,
+will the command still be valid?
 ```
-Agent 会同时调用 `rag_search` 查文档 + `compare_devices` 对比器件差异，综合推理给出答案，而不是简单查表。
+The Agent can combine rag_search with compare_devices to reason about the
+device-specific differences rather than simply performing a table lookup.
 
-## 技术栈
+## Tech Stack
 
-- **LangGraph** — Agent 框架（`StateGraph` + `MessagesState` + `ToolNode`）
-- **LangChain** — 工具定义（`@tool` 装饰器）、LLM 调用
-- **DeepSeek** — LLM（tool calling 支持良好，成本低于 OpenAI）
-- **FAISS** — 向量检索
-- **MCP** — 工具封装为 MCP Server，支持标准化协议调用
-- **LangSmith** — Agent 链路追踪与可观测性
+- **LangGraph** — Agent framework using StateGraph, MessagesState, and ToolNode
+- **LangChain** — Tool definitions with the @tool decorator and LLM integration
+- **DeepSeek** — LLM with tool-calling support
+- **FAISS** — Vector retrieval
+- **MCP** — Exposes the tools through a standardized MCP Server
+- **LangSmith** — Agent tracing and observability
 - **Streamlit** — Web UI
 
-## 快速开始
+## Quick Start
 
 ```bash
-# 1. 安装依赖
+# 1. Install dependencies
 pip install -r requirements.txt
 
-# 2. 配置 API Key
+# 2. Configure API keys
 cp .env.example .env
-# 编辑 .env，填入以下环境变量：
-# DEEPSEEK_API_KEY=your_key
-# OPENAI_API_KEY=your_key（用于 embedding）
-# LANGCHAIN_API_KEY=your_key（用于 LangSmith，可选）
-# LANGCHAIN_TRACING_V2=true
-# LANGCHAIN_PROJECT=bootgen-agent
+Edit .env and configure the required environment variables:
+DEEPSEEK_API_KEY=your_key
+OPENAI_API_KEY=your_key
+LANGCHAIN_API_KEY=your_key
+LANGCHAIN_TRACING_V2=true
+LANGCHAIN_PROJECT=bootgen-agent
+OPENAI_API_KEY is used for embeddings. LANGCHAIN_API_KEY is optional and
+is only required if LangSmith tracing is enabled.
 
-# 3. 确保向量库已生成
-# vectorstore/ 目录需存在，否则先运行 rag-knowledge-bot 完成索引
+# 3. Ensure the Vector Store Exists
+The vectorstore/ directory must exist before starting the Agent.
 
-# 4. 启动 Streamlit UI
+If it does not exist, first run
+rag-knowledge-bot to load and index the technical
+documentation.
+
+# 4. Start the Streamlit UI
 streamlit run app.py
 
-# 5. 启动 MCP Server（可选）
+# 5. Start the MCP Server (Optional)
 # mcp dev mcp_server.py
 ```
 
-## 项目结构
+## Project Structure
 
 ```
 ├── tools/
-│   ├── rag_tool.py           # RAG 检索工具
-│   ├── bif_generator.py      # BIF 文件生成
-│   ├── command_validator.py  # bootgen 命令语法校验
-│   └── device_comparator.py  # 器件对比查表
-├── agent.py                  # LangChain Agent 版本（初始实现）
-├── agent_lg.py               # LangGraph 版本（重构版，当前使用）
-├── mcp_server.py             # MCP Server（四个工具的标准化封装）
-├── app.py                    # Streamlit 入口
+│   ├── rag_tool.py           # RAG retrieval tool
+│   ├── bif_generator.py      # BIF file generation
+│   ├── command_validator.py  # Bootgen command syntax validation
+│   └── device_comparator.py  # Device comparison
+├── agent.py                  # LangChain Agent version (initial implementation)
+├── agent_lg.py               # LangGraph version (current implementation)
+├── mcp_server.py             # MCP Server exposing all four tools
+├── app.py                    # Streamlit entry point
 └── README.md
 ```
 
-## LangGraph 架构
+## LangGraph Architecture
 
 ```
-[用户输入]
-    ↓
-[agent 节点] — LLM 决策，判断调用哪个工具
-    ↓ (有 tool_calls)          ↓ (无 tool_calls)
-[tools 节点]               [END 结束]
-    ↓
-回到 [agent 节点]
+[User Input]
+      ↓
+[Agent Node] — LLM decides which tool to invoke
+      ↓
+  ┌───────────────┐
+  │               │
+Tool Calls      No Tool Calls
+  ↓               ↓
+[Tools Node]     [END]
+  ↓
+Back to [Agent Node]
 ```
 
-相比 LangChain Agent 的黑盒循环，LangGraph 的优势：
-- **状态可见**：每个节点的输入输出都是显式的 `MessagesState`，方便调试
-- **流程可控**：通过条件边精确控制路由逻辑，复杂场景下可以加入自定义节点
-- **易于扩展**：后续加入"人工确认"节点、"错误重试"节点只需加节点和边
+Compared with the more opaque execution loop of a LangChain Agent,
+LangGraph provides several advantages:
 
-## 可观测性（LangSmith）
+- **Explicit state:** Each node's inputs and outputs are represented through
+MessagesState, making the workflow easier to inspect and debug.
+- **Controlled execution:** Conditional edges provide precise control over
+routing logic and allow custom nodes to be introduced for more complex
+workflows.
+- **Extensibility:** Additional nodes, such as human approval or error
+recovery, can be added without redesigning the entire workflow.
 
-集成 LangSmith 对 Agent 链路进行追踪，可实时查看：
-- 每次 LLM 决策的完整输入输出
-- 工具调用的参数和返回值
-- 整个链路的耗时分布和 token 消耗
+## Observability with LangSmith
 
-示例追踪记录：https://smith.langchain.com/public/79a5705d-8365-4ce0-9e8f-da220bfb149c/r
+LangSmith is integrated to trace the Agent execution flow. It provides
+visibility into:
+
+Complete inputs and outputs for each LLM decision
+Tool-call parameters and return values
+Latency distribution across the workflow
+Token usage
+
+Example LangSmith Trace
 
 ## MCP Server
 
-四个工具同时封装为 MCP Server，支持任意 MCP 兼容客户端（如 Claude Desktop）直接调用，无需通过 LangGraph Agent。
+All four tools are also exposed through an MCP Server, allowing any
+MCP-compatible client, such as Claude Desktop, to invoke them directly
+without going through the LangGraph Agent.
+
+Start the MCP development server with:
 
 ```bash
 mcp dev mcp_server.py
 ```
 
-## 关键设计决策
+This separates the tool implementation from the Agent orchestration
+layer, allowing the same tools to be reused by different MCP-compatible
+clients.
 
-**为什么 Agent 效果比纯 RAG 好？**
+## Key Design Decisions
 
-RAG 的瓶颈在检索层——向量相似度不稳定，技术文档噪音会干扰检索质量。而 `generate_bif`、`check_command_syntax`、`compare_devices` 这三个工具的输出是确定性的，完全不依赖检索，自然没有"找不到相关信息"的问题。
+**Why Does the Agent Perform Better Than Pure RAG?**
 
-> 核心原则：**能用规则/工具解决的问题，不要交给 RAG。RAG 适合开放性文档查询，工具适合有明确输入输出的结构化任务。**
+A key limitation of RAG is that its performance depends on retrieval quality.
+Vector similarity can be unstable, and noise in technical documentation can
+further degrade retrieval results.
 
-**为什么从 LangChain Agent 迁移到 LangGraph？**
+In contrast, the outputs of generate_bif, check_command_syntax, and
+compare_devices are deterministic and do not depend on retrieval.
 
-LangChain Agent 是黑盒——只能看到最终输出，看不到中间决策过程。LangGraph 把每一步显式建模为节点，结合 LangSmith 追踪，调试效率大幅提升。两个版本都保留在仓库里，可直接对比代码差异。
+This eliminates failure modes such as "no relevant information found" for
+structured tasks.
 
-## 已知局限与后续方向
+> Core principle: Use rules and deterministic tools whenever possible.
+Use RAG for open-ended knowledge retrieval and tools for structured tasks
+with well-defined inputs and outputs.
 
-- 当前仅支持 zynqmp 和 versal 两种器件，可扩展至 zynq、spartanup 等
-- BIF 生成仅覆盖 non-secure 镜像，安全镜像（加密/认证）为后续扩展方向
-- 可加入"人工确认"节点：生成 BIF 后先展示给用户确认，再执行命令校验
+This principle became a key design decision for the Agent architecture.
+
+**Why Migrate from LangChain Agent to LangGraph?**
+
+The initial implementation used a LangChain Agent. However, the execution
+process was relatively opaque: it was difficult to inspect the intermediate
+decisions and tool-routing logic.
+
+The LangGraph implementation explicitly models each step as a node in a state
+graph. Combined with LangSmith tracing, this makes the Agent workflow easier
+to debug and extend.
+
+Both implementations are retained in the repository, allowing direct
+comparison between the LangChain Agent and LangGraph approaches.
+
+## Known Limitations and Future Directions
+
+- Currently supports only zynqmp and versal; support could be extended to
+additional devices such as zynq and spartanup.
+- BIF generation currently covers non-secure boot images. Secure boot features
+such as encryption and authentication are potential future extensions.
+- A human-in-the-loop approval node could be added so that generated BIF
+files are presented to the user for confirmation before command validation
+or further execution.
