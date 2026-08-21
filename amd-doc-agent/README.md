@@ -1,4 +1,5 @@
 ---
+---
 title: AMD Doc Agent
 emoji: 🤖
 colorFrom: red
@@ -7,96 +8,163 @@ sdk: docker
 pinned: false
 ---
 
-# 🔍 项目4：AMD 技术文档多文档问答系统
+[English](README.md) | [中文](README_CN.md)
 
-> **项目系列**：[项目1+2: RAG知识库](../rag-knowledge-bot) → [项目3: Bootgen Agent](../bootgen-agent) → **项目4: 多文档RAG + 部署（当前）**
+# 🔍 Project 4: AMD Technical Document Multi-Document Q&A System
 
-基于 RAG（检索增强生成）的多文档知识库问答系统，专为 AMD FPGA/SoC 技术文档设计。在前序项目基础上新增多文档支持、多语言检索、RAGAS 评估框架、FastAPI 后端和 Redis 缓存。
+> **Project Series:** [Projects 1–2: RAG Knowledge Base](../rag-knowledge-bot) → [Project 3: Bootgen Agent](../bootgen-agent) → **Project 4: Multi-Document RAG + Deployment (Current)**
 
-🚀 **Live Demo**: [https://huggingface.co/spaces/chongyuanz/amd-doc-agent](https://huggingface.co/spaces/chongyuanz/amd-doc-agent)
+A multi-document RAG (Retrieval-Augmented Generation) system designed for AMD
+FPGA/SoC technical documentation. Building on the previous projects, this
+version introduces multi-document retrieval, multilingual search, RAGAS-based
+evaluation, a FastAPI backend, Redis caching, and cloud deployment.
 
-## 知识库文档
+🚀 **Live Demo:** https://huggingface.co/spaces/chongyuanz/amd-doc-agent
 
-| 文档 | 内容 | 语言 |
-|------|------|------|
-| UG1283 | Bootgen 用户指南 | 中文 |
-| UG1085 | Zynq UltraScale+ 技术参考手册 | 英文 |
-| UG1137 | Zynq UltraScale+ MPSoC 软件开发指南 | 英文 |
+## Knowledge Base
 
-三份文档覆盖"硬件架构 → 软件开发 → 镜像生成工具"完整链路，支持跨文档综合查询。
+| Document | Content | Language |
+|---|---|---|
+| UG1283 | Bootgen User Guide | Chinese |
+| UG1085 | Zynq UltraScale+ Technical Reference Manual | English |
+| UG1137 | Zynq UltraScale+ MPSoC Software Developer Guide | English |
+
+Together, the three documents cover the end-to-end workflow from **hardware
+architecture → software development → boot image generation**, enabling
+cross-document technical queries.
 
 ## Demo
 
-> 问：FSBL 的作用是什么？
+> **Q:** What is the role of FSBL?
 >
-> 答：根据 UG1085，FSBL 执行开始后 CSU ROM 进入后配置阶段，负责系统篡改响应。根据 UG1137，FSBL 直接从 FLASH 设备复制比特流块并执行身份验证。根据 UG1283，FSBL 在启动流程中涉及加密、签名等多个安全阶段。
+> **A:** According to UG1085, the FSBL begins execution after the CSU ROM
+> enters the post-configuration phase and is responsible for system
+> tamper-response handling. According to UG1137, the FSBL copies bitstream
+> blocks directly from the flash device and performs authentication.
+> According to UG1283, FSBL participates in multiple security-related stages
+> of the boot process, including encryption and signing.
 >
-> （信息来自 UG1085、UG1137、UG1283）
+> *(Information retrieved from UG1085, UG1137, and UG1283.)*
 
-## 核心特性
+## Core Features
 
-**多文档检索**
-三份文档统一向量化存入 FAISS，每个 chunk 打上来源标签（`source`、`filename`），检索时跨文档召回。
+### Multi-Document Retrieval
 
-**多语言检索（Query Translation）**
-中英文混合知识库存在语义匹配偏差——中文问题和中文 chunk 向量天然更近，导致英文文档系统性被忽略。解决方案：检索前用 LLM 将用户问题翻译成英文，同时用中英文两个 query 检索，合并去重后取 top-k，显著提升英文文档的召回率。
+Three technical documents are embedded into a shared FAISS vector store. Each
+chunk is tagged with source metadata such as `source` and `filename`, allowing
+the retriever to search across documents and preserve document provenance.
 
-**来源标注**
-每个 chunk 携带 `metadata["source"]`，Prompt 中要求 LLM 回答时注明来源文档，回答可追溯。
+### Multilingual Retrieval with Query Translation
 
-**FastAPI 后端**
-除 Streamlit UI 外，同时提供 RESTful API 接口，支持系统集成。响应中包含 `answer`、`question`、`sources` 三个字段，并通过中间件记录每次请求的响应时间。
+A mixed Chinese-English knowledge base introduces a retrieval bias: Chinese
+queries tend to have higher embedding similarity with Chinese chunks, causing
+English documents to be systematically under-retrieved.
 
-**Redis 缓存**
-相同问题第二次请求直接返回缓存结果，响应时间从 ~13 秒降至 ~0.005 秒（2600 倍提升）。缓存 key 经过文本标准化处理（转小写、去空格），避免同义重复请求穿透缓存。
+To address this, the system uses **Query Translation** before retrieval:
 
-**RAGAS 评估框架**
-使用 RAGAS 对系统质量进行量化评估，相比项目2的关键词匹配更能捕捉语义层面的质量问题。
+1. Generate an English translation of the user's query using an LLM.
+2. Search using both the original Chinese query and the translated English query.
+3. Merge and deduplicate the results.
+4. Select the final top-k chunks.
 
-| 指标 | 纯向量检索（基础版） | 混合检索 + Query Translation | 提升 |
-|------|------------------|--------------------------|------|
+This significantly improves retrieval of relevant English documentation for
+Chinese queries.
+
+### Source Attribution
+
+Each chunk stores source information in `metadata["source"]`. The generation
+prompt instructs the LLM to identify the source documents used in its answer,
+making responses traceable to the underlying technical documentation.
+
+### FastAPI Backend
+
+In addition to the Streamlit UI, the system provides a RESTful API for
+integration with other applications.
+
+The API response includes:
+
+- `answer`
+- `question`
+- `sources`
+
+Middleware also records the response time for each request.
+
+### Redis Caching
+
+Repeated queries are served directly from Redis instead of running through
+the complete RAG pipeline again.
+
+| Configuration | Response Time |
+|---|---:|
+| Full RAG pipeline | ~13 seconds |
+| Redis cache hit | ~0.005 seconds |
+
+This represents approximately a **2,600× reduction in latency on cache hits**.
+
+Cache keys are normalized by converting text to lowercase and removing
+whitespace, reducing unnecessary cache misses caused by minor differences in
+query formatting.
+
+### RAGAS Evaluation
+
+RAGAS is used to quantitatively evaluate system quality. This provides a more
+semantic evaluation approach than the keyword-matching evaluation used in
+Project 2.
+
+| Metric | Baseline Vector Retrieval | Hybrid Retrieval + Query Translation | Improvement |
+|---|---:|---:|---:|
 | Faithfulness | 0.39 | **0.80** | +105% |
-| Answer Relevancy | 0.54 | 0.50 | - |
+| Answer Relevancy | 0.54 | 0.50 | — |
 | Context Precision | 0.06 | **0.16** | +171% |
 
-引入 BM25 混合检索后，Faithfulness 提升 105%，Context Precision 提升 171%，
-幻觉问题显著改善。
+The addition of BM25 hybrid retrieval and Query Translation improved
+**Faithfulness by 105%** and **Context Precision by 171%**, significantly
+reducing unsupported or hallucinated responses in the evaluation set.
 
-分数偏低的根本原因在于检索层质量——PDF 噪音清洗后仍有残留，且中文问题与英文文档存在语义匹配偏差。这是后续优化的主要方向。
+The remaining low scores primarily originate from the retrieval layer:
+residual PDF noise remains after preprocessing, and semantic mismatch still
+exists between Chinese queries and English technical documentation. These
+remain key areas for further optimization.
 
-**云端部署**
-Docker 容器化，部署于 Hugging Face Spaces（CPU Free tier），公网可访问。
+### Cloud Deployment
 
-## 技术栈
+The application is containerized with Docker and deployed to
+**Hugging Face Spaces** using the CPU Free tier, making the system publicly
+accessible.
 
-- **LangChain** — RAG 框架（文档加载、切分、检索链）
-- **OpenAI** — text-embedding-ada-002 向量化
-- **DeepSeek** — LLM 生成（成本低，效果好）
-- **FAISS** — 本地向量数据库
-- **RAGAS** — RAG 系统评估框架
-- **FastAPI** — RESTful API 后端
-- **Redis** — 响应缓存
+## Tech Stack
+
+- **LangChain** — RAG framework for document loading, chunking, and retrieval
+- **OpenAI** — `text-embedding-ada-002` embeddings
+- **DeepSeek** — LLM generation
+- **FAISS** — Local vector store
+- **RAGAS** — RAG evaluation framework
+- **FastAPI** — RESTful API backend
+- **Redis** — Response caching
 - **Streamlit** — Web UI
-- **Docker** — 容器化部署
-- **Hugging Face Spaces** — 云端托管
+- **Docker** — Containerization
+- **Hugging Face Spaces** — Cloud hosting
 
-## 快速开始
+## Quick Start
+
+### Local Streamlit Application
 
 ```bash
-# 本地运行（Streamlit）
 pip install -r requirements.txt
 cp .env.example .env
-# 填入 OPENAI_API_KEY 和 DEEPSEEK_API_KEY
+
+# Add OPENAI_API_KEY and DEEPSEEK_API_KEY to .env
+
 streamlit run app.py
 
-# 本地运行（FastAPI）
+# Local FastAPI Server
 uvicorn main:app --reload
-# 访问 http://localhost:8000/docs 查看交互式 API 文档
+# Open http://localhost:8000/docs to access the interactive API documentation.
 
-# 启动 Redis（需要 Docker）
+# Start Redis with Docker
 docker run -d -p 6379:6379 redis
 
-# Docker 运行（完整应用）
+# Run the Complete Application with Docker
 docker build -t amd-doc-agent .
 docker run -p 8501:8501 \
   -e OPENAI_API_KEY=your_key \
@@ -104,60 +172,107 @@ docker run -p 8501:8501 \
   amd-doc-agent
 ```
 
-## 项目结构
+## Project Structure
 
 ```
-├── data/                  # 三份 AMD 技术文档 PDF
+├── data/                  # Three AMD technical documentation PDFs
 ├── src/
-│   ├── loader.py          # 多文档加载、噪音清洗、来源标注
-│   ├── embedder.py        # 向量化与 FAISS 存储
-│   ├── retriever.py       # 相似度检索 + 多语言检索（Query Translation）
-│   ├── chain.py           # RAG 链组装（含来源标注 Prompt）
-│   ├── evaluator.py       # 关键词匹配评估（基础版）
-│   └── evaluator_ragas.py # RAGAS 评估框架（进阶版）
-├── main.py                # FastAPI 入口（RESTful API + Redis 缓存）
-├── cache.py               # Redis 缓存逻辑
-├── app.py                 # Streamlit 入口
+│   ├── loader.py          # Multi-document loading, noise cleaning, and source metadata
+│   ├── embedder.py        # Embedding generation and FAISS storage
+│   ├── retriever.py       # Similarity search + multilingual retrieval
+│   │                       # (Query Translation)
+│   ├── chain.py            # RAG chain and source attribution prompt
+│   ├── evaluator.py       # Keyword-based evaluation (baseline)
+│   └── evaluator_ragas.py # RAGAS evaluation (advanced)
+├── main.py                # FastAPI entry point (REST API + Redis cache)
+├── cache.py               # Redis caching logic
+├── app.py                 # Streamlit entry point
 ├── Dockerfile
 ├── requirements.txt
 └── README.md
 ```
 
-## 项目演进关系
+## Project Evolution
 
 ```
-项目1: 基础 RAG
-  · 单文档（PDF/TXT）、本地运行、关键词匹配评估
-    ↓ 加入垂直领域 + PDF噪音清洗
-项目2: AMD Bootgen 专属问答
-  · UG1283 单文档、PDF噪音清洗、15题评估模块
-    ↓ 加入 Agent + 工具调用 + MCP + LangSmith
-项目3: Bootgen Agent
-  · LangChain Agent → LangGraph、4个专属工具、MCP Server、LangSmith追踪
-    ↓ 加入多文档 + 多语言检索 + RAGAS + FastAPI + Redis + 部署
-项目4: AMD 多文档问答系统（当前）
-  · 3份文档（中英文混合）、Query Translation、RAGAS评估
-  · FastAPI + Redis缓存、Docker + Hugging Face Spaces 部署
+Project 1: Basic RAG
+  · Single-document PDF/TXT support
+  · Local execution
+  · Keyword-based evaluation
+    ↓ Add domain-specific documentation + PDF noise cleaning
+
+Project 2: AMD Bootgen Q&A
+  · UG1283 single-document knowledge base
+  · PDF noise cleaning
+  · 15-question evaluation module
+    ↓ Add Agent + tool calling + MCP + LangSmith
+
+Project 3: Bootgen Agent
+  · LangChain Agent → LangGraph
+  · Four domain-specific tools
+  · MCP Server
+  · LangSmith tracing
+    ↓ Add multi-document retrieval + multilingual search
+      + RAGAS + FastAPI + Redis + deployment
+
+Project 4: AMD Multi-Document Q&A System (Current)
+  · Three-document mixed-language knowledge base
+  · Query Translation
+  · RAGAS evaluation
+  · FastAPI + Redis caching
+  · Docker + Hugging Face Spaces deployment
 ```
 
-## 技术挑战与发现
+## Technical Challenges and Findings
 
-**中英文混合知识库的检索偏差**
-使用 OpenAI embedding 时，中文问题和中文 chunk 的向量相似度天然高于英文 chunk，导致英文文档被系统性忽略。通过 Query Translation 在检索前将问题翻译为英文，实现双语并行检索，有效解决了这一问题。
+**Multilingual Retrieval Bias**
+With OpenAI embeddings, Chinese queries tend to have higher similarity with
+Chinese chunks than English chunks. As a result, English documentation can be
+systematically under-retrieved.
+**Solution:** Query Translation generates an English version of the user's
+query before retrieval, enabling parallel Chinese and English searches.
 
-**PDF 噪音对检索质量的影响**
-技术文档的页眉、页脚、页码会污染向量空间，使不相关 chunk 的向量距离被人为拉近。通过正则清洗 + 跳过封面目录页，将 chunk 数量从原始的 ~2000 降至 1792，检索区分度明显提升。
+This substantially improves cross-language retrieval for the mixed-language
+knowledge base.
 
-**评估框架的演进**
-项目2使用关键词匹配评估，简单但无法捕捉语义层面的质量问题。项目4引入 RAGAS，通过 Faithfulness 和 Context Precision 等指标量化评估，发现检索层是主要瓶颈，为后续优化指明方向。
+**Impact of PDF Noise on Retrieval**
+Technical documentation often contains repeated headers, footers, page
+numbers, and other PDF artifacts. These repeated elements can contaminate the
+embedding space and artificially increase similarity between unrelated chunks.
 
-**Redis 缓存的实际效果**
-相同问题的响应时间从 13 秒（RAG 全流程）降至 0.005 秒（缓存命中），提升 2600 倍。通过文本标准化（转小写、去空格）处理同义重复请求，避免缓存穿透。
+Regex-based cleaning combined with skipping cover and table-of-contents pages
+reduced the number of chunks from approximately 2,000 to 1,792, improving
+retrieval discrimination.
 
-## 已知局限与后续方向
+**Evolution of the Evaluation Framework**
+Project 2 used keyword matching to evaluate answers. While simple, this
+approach cannot reliably capture semantic correctness.
 
-- 英文文档的表格、多栏布局解析质量有限
-- Query Translation 增加了一次额外的 LLM 调用，响应时间略有增加
-- RAGAS 的 Answer Relevancy 指标与 DeepSeek API 存在兼容性问题（`n>1` 不支持）
-- 可扩展至更多 AMD 文档（AM011、UG1304 等），建议届时替换为 Pinecone 等云端向量库
-- 可引入 Re-ranking 模型对检索结果重排序，进一步提升准确率
+Project 4 introduced RAGAS, using metrics such as Faithfulness and Context
+Precision to quantitatively evaluate the RAG pipeline.
+
+The evaluation showed that retrieval quality was the primary bottleneck,
+providing a clear direction for further optimization.
+
+**Practical Impact of Redis Caching**
+For identical queries, response latency decreased from approximately
+13 seconds for the complete RAG pipeline to 0.005 seconds on a Redis
+cache hit — approximately a 2,600× reduction.
+
+Query normalization, including lowercasing and whitespace removal, helps
+reduce unnecessary cache misses from minor formatting differences.
+
+## Known Limitations and Future Directions
+
+- Parsing quality for tables and multi-column layouts in English PDFs remains
+limited.
+- Query Translation introduces an additional LLM call and therefore adds some
+latency.
+- The RAGAS Answer Relevancy metric has compatibility issues with the
+DeepSeek API because the API does not support n > 1.
+The knowledge base can be expanded to additional AMD documentation such as
+AM011 and UG1304.
+- A managed vector database such as Pinecone could be considered as the
+knowledge base grows.
+- A reranking model could be introduced to further improve retrieval
+precision.
