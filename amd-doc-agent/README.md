@@ -1,5 +1,4 @@
 ---
----
 title: AMD Doc Agent
 emoji: 🤖
 colorFrom: red

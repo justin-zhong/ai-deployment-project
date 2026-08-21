@@ -1,4 +1,4 @@
-[English](README.md) | [中文](README_CN.md)
+[English](README.md) | **中文**
 
 # 🤖 项目3：Bootgen 智能助手 Agent
 
