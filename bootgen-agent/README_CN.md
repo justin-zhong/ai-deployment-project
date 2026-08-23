@@ -52,27 +52,35 @@ Agent 会同时调用 `rag_search` 查文档 + `compare_devices` 对比器件差
 
 ## 快速开始
 
-```bash
 # 1. 安装依赖
+```bash
 pip install -r requirements.txt
+```
 
 # 2. 配置 API Key
+```bash
 cp .env.example .env
+```
 # 编辑 .env，填入以下环境变量：
-# DEEPSEEK_API_KEY=your_key
-# OPENAI_API_KEY=your_key（用于 embedding）
-# LANGCHAIN_API_KEY=your_key（用于 LangSmith，可选）
-# LANGCHAIN_TRACING_V2=true
-# LANGCHAIN_PROJECT=bootgen-agent
+```bash
+DEEPSEEK_API_KEY=your_key
+OPENAI_API_KEY=your_key（用于 embedding）
+LANGCHAIN_API_KEY=your_key（用于 LangSmith，可选）
+LANGCHAIN_TRACING_V2=true
+LANGCHAIN_PROJECT=bootgen-agent
+```
 
 # 3. 确保向量库已生成
-# vectorstore/ 目录需存在，否则先运行 rag-knowledge-bot 完成索引
+`vectorstore/` 目录需存在，否则先运行 `rag-knowledge-bot` 完成索引
 
 # 4. 启动 Streamlit UI
+```bash
 streamlit run app.py
+```
 
 # 5. 启动 MCP Server（可选）
-# mcp dev mcp_server.py
+```bash
+mcp dev mcp_server.py
 ```
 
 ## 项目结构

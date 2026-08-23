@@ -7,7 +7,7 @@ sdk: docker
 pinned: false
 ---
 
-[English](README.md) | [中文](README_CN.md)
+**English** | [中文](README_CN.md)
 
 # 🔍 Project 4: AMD Technical Document Multi-Document Q&A System
 
@@ -110,11 +110,13 @@ RAGAS is used to quantitatively evaluate system quality. This provides a more
 semantic evaluation approach than the keyword-matching evaluation used in
 Project 2.
 
-| Metric | Baseline Vector Retrieval | Hybrid Retrieval + Query Translation | Improvement |
+| Retrieval | Faithfulness | Answer Relevancy | Context Precision |
 |---|---:|---:|---:|
-| Faithfulness | 0.39 | **0.80** | +105% |
-| Answer Relevancy | 0.54 | 0.50 | — |
-| Context Precision | 0.06 | **0.16** | +171% |
+| Vector | 0.39 | 0.54 | 0.06 |
+| BM25 | - | - | — |
+| Vector + BM25 | - | - | - |
+|Vector + Query Translation| - | - | - |
+|Vector + BM25 + Query Translation| 0.80 | 0.50 | 0.16 |
 
 The addition of BM25 hybrid retrieval and Query Translation improved
 **Faithfulness by 105%** and **Context Precision by 171%**, significantly

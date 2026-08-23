@@ -1,13 +1,14 @@
-[English](README.md) | [中文](README_CN.md)
+**English** | [中文](README_CN.md)
 
-# LLM Application Engineering Projects
+# AI / LLM Application Engineering Portfolio
 
 Hands-on AI application engineering projects built around AMD FPGA/SoC
 technical domains, covering **RAG, LLM Agents, MCP, retrieval optimization,
 evaluation, API development, caching, and cloud deployment**.
 
-The projects progress from a basic RAG pipeline to a deployed multi-document
-RAG system and a domain-specific LangGraph Agent.
+The portfolio demonstrates an end-to-end progression from foundational RAG
+pipelines to a domain-specific Agent and a deployed multi-document RAG
+system.
 
 🚀 **[Live Demo — AMD Technical Document RAG System](https://huggingface.co/spaces/chongyuanz/amd-doc-agent)**
 
@@ -79,22 +80,6 @@ A foundational RAG implementation developed through two iterations, starting
 with a general-purpose document Q&A pipeline and evolving into a
 domain-specific RAG system for AMD technical documentation.
 
-### Key Features
-
-- PDF and TXT document ingestion
-- Text chunking with configurable chunk size and overlap
-- Vector embeddings and FAISS similarity search
-- LLM-based question answering
-- PDF noise cleaning for technical documentation
-- Keyword-based evaluation with a 15-question test set
-- Streamlit-based user interface
-
-### Engineering Focus
-
-The project was used to investigate how document preprocessing, chunking
-strategies, and retrieval quality affect RAG performance on technical
-documentation.
-
 See [`rag-knowledge-bot/README.md`](rag-knowledge-bot/README.md) for details.
 
 ---
@@ -107,36 +92,6 @@ A domain-specific AI Agent for AMD Boot/PDI engineering workflows, built with
 LangGraph and designed to combine document retrieval with deterministic
 engineering tools.
 
-### Architecture
-
-The Agent integrates four specialized tools:
-
-1. **RAG Search** — retrieves relevant AMD technical documentation
-2. **BIF Generator** — generates Boot Image Format (BIF) files
-3. **Command Validator** — validates Bootgen command syntax
-4. **Device Comparison** — compares device configurations and capabilities
-
-The Agent uses LangGraph to explicitly model the workflow as a state graph,
-allowing the LLM to determine when to retrieve information or invoke a
-specific tool.
-
-### Key Features
-
-- LangGraph StateGraph-based Agent workflow
-- Tool calling and conditional routing
-- RAG integration
-- Four domain-specific engineering tools
-- MCP Server for standardized tool access
-- Claude Desktop / MCP-compatible client integration
-- LangSmith tracing and observability
-- Streamlit-based user interface
-
-### Engineering Focus
-
-The project explores the difference between **open-ended knowledge retrieval**
-and **structured engineering tasks**. Instead of relying on RAG for every task,
-deterministic tools are used when the task has well-defined inputs and outputs.
-
 See [`bootgen-agent/README.md`](bootgen-agent/README.md) for details.
 
 ---
@@ -145,65 +100,9 @@ See [`bootgen-agent/README.md`](bootgen-agent/README.md) for details.
 
 **Directory:** `amd-doc-agent/`
 
-A production-oriented multi-document RAG system for AMD FPGA/SoC technical
+A production-style multi-document RAG system for AMD FPGA/SoC technical
 documentation, developed to address the retrieval limitations identified in
 the earlier projects.
-
-### Architecture
-
-The system supports cross-document retrieval across:
-
-- **UG1283** — Chinese technical documentation
-- **UG1085** — English technical documentation
-- **UG1137** — English technical documentation
-
-The retrieval pipeline combines Query Translation with hybrid retrieval:
-
-**User Query → Query Translation → Bilingual Queries → BM25 + Vector Search → Context Assembly → LLM Generation → Answer + Source Citations**
-
-### Key Features
-
-- Multi-document RAG
-- Cross-document retrieval
-- BM25 + vector hybrid retrieval
-- LLM-based Query Translation
-- Multilingual retrieval
-- RAGAS evaluation
-- Faithfulness and Context Precision metrics
-- FastAPI REST API
-- Redis response caching
-- Docker containerization
-- Hugging Face Spaces deployment
-- Streamlit web interface
-
-### Evaluation
-
-RAGAS was used to quantitatively evaluate retrieval and generation quality.
-
-Compared with the baseline vector-search implementation:
-
-- **Faithfulness improved by 105%**
-- **Context Precision improved by 171%**
-
-These experiments demonstrated the benefits of combining hybrid retrieval
-with Query Translation for the multilingual technical-document use case.
-
-### Performance
-
-Redis caching was added to avoid repeating the full retrieval and generation
-pipeline for identical queries.
-
-For repeated queries:
-
-| Configuration | Response Time |
-|---|---:|
-| Full RAG pipeline | ~13 seconds |
-| Redis cache hit | ~5 milliseconds |
-
-This represents approximately a **2,600× reduction in response latency on
-cache hits**.
-
-🚀 **[Try the Live Demo](https://huggingface.co/spaces/chongyuanz/amd-doc-agent)**
 
 See [`amd-doc-agent/README.md`](amd-doc-agent/README.md) for implementation
 details.
@@ -289,39 +188,3 @@ from approximately **13 seconds to 5 milliseconds on cache hits**.
 
 Each project contains its own `README.md` and `requirements.txt`.
 See the corresponding directory for detailed setup instructions.
-
-### Projects 1–2
-
-```bash
-cd rag-knowledge-bot
-pip install -r requirements.txt
-streamlit run app.py
-```
-
-### Projects 3
-
-```bash
-cd bootgen-agent
-pip install -r requirements.txt
-streamlit run app.py
-mcp dev mcp_server.py
-```
-
-### Projects 4
-
-```bash
-cd amd-doc-agent
-pip install -r requirements.txt
-streamlit run app.py
-uvicorn main:app --reload
-```
-
-## Future Improvements
-Potential areas for further development include:
-- Reranking models for improved retrieval precision
-- More comprehensive automated evaluation datasets
-- Streaming responses for improved perceived latency
-- Persistent conversation memory
-- Authentication and access control
-- Production-grade monitoring and logging
-- More advanced Agent planning and error recovery

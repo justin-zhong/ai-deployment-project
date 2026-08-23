@@ -1,4 +1,4 @@
-[English](README.md) | [中文](README_CN.md)
+**English** | [中文](README_CN.md)
 
 # 📚 Project 1 + Project 2: AMD Bootgen Technical Document Q&A Bot
 

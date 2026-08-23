@@ -55,11 +55,13 @@ pinned: false
 **RAGAS 评估框架**
 使用 RAGAS 对系统质量进行量化评估，相比项目2的关键词匹配更能捕捉语义层面的质量问题。
 
-| 指标 | 纯向量检索（基础版） | 混合检索 + Query Translation | 提升 |
-|------|------------------|--------------------------|------|
-| Faithfulness | 0.39 | **0.80** | +105% |
-| Answer Relevancy | 0.54 | 0.50 | - |
-| Context Precision | 0.06 | **0.16** | +171% |
+| 检索 | Faithfulness | Answer Relevancy | Context Precision |
+|---|---:|---:|---:|
+| Vector | 0.39 | 0.54 | 0.06 |
+| BM25 | - | - | — |
+| Vector + BM25 | - | - | - |
+|Vector + Query Translation| - | - | - |
+|Vector + BM25 + Query Translation| 0.80 | 0.50 | 0.16 |
 
 引入 BM25 混合检索后，Faithfulness 提升 105%，Context Precision 提升 171%，
 幻觉问题显著改善。

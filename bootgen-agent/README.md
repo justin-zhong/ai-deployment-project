@@ -1,4 +1,4 @@
-[English](README.md) | [中文](README_CN.md)
+**English** | [中文](README_CN.md)
 
 # 🤖 Project 3: Bootgen Intelligent Assistant Agent
 
@@ -71,11 +71,13 @@ device-specific differences rather than simply performing a table lookup.
 
 ## Quick Start
 
-```bash
 # 1. Install dependencies
+```bash
 pip install -r requirements.txt
+```
 
 # 2. Configure API keys
+```bash
 cp .env.example .env
 Edit .env and configure the required environment variables:
 DEEPSEEK_API_KEY=your_key
@@ -83,21 +85,25 @@ OPENAI_API_KEY=your_key
 LANGCHAIN_API_KEY=your_key
 LANGCHAIN_TRACING_V2=true
 LANGCHAIN_PROJECT=bootgen-agent
+```
 OPENAI_API_KEY is used for embeddings. LANGCHAIN_API_KEY is optional and
 is only required if LangSmith tracing is enabled.
 
 # 3. Ensure the Vector Store Exists
-The vectorstore/ directory must exist before starting the Agent.
+The `vectorstore/` directory must exist before starting the Agent.
 
 If it does not exist, first run
-rag-knowledge-bot to load and index the technical
+`rag-knowledge-bot` to load and index the technical
 documentation.
 
 # 4. Start the Streamlit UI
+```bash
 streamlit run app.py
+```
 
 # 5. Start the MCP Server (Optional)
-# mcp dev mcp_server.py
+```bash
+mcp dev mcp_server.py
 ```
 
 ## Project Structure
