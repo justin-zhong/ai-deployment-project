@@ -2,7 +2,7 @@
 
 # 📚 项目1+项目2：AMD Bootgen 技术文档问答机器人
 
-> **项目系列**：**项目1+2: RAG知识库（当前）** → [项目3: Bootgen Agent](../bootgen-agent) → [项目4: 多文档RAG + 部署](../amd-doc-agent)
+> **项目系列**：**项目1-2: RAG 知识库（当前）** → [项目3: Bootgen Agent](../bootgen-agent) → [项目4: 多文档RAG + 部署](../amd-doc-agent)
 
 基于 RAG（检索增强生成）的垂直领域知识库问答系统，专为 AMD FPGA/SoC 技术文档设计。当前知识库基于 UG1283 Bootgen 用户指南（2025.2），支持用自然语言查询启动镜像生成、BIF 语法、加密认证等技术问题。
 

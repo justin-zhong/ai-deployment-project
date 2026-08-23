@@ -71,12 +71,12 @@ device-specific differences rather than simply performing a table lookup.
 
 ## Quick Start
 
-# 1. Install dependencies
+### 1. Install dependencies
 ```bash
 pip install -r requirements.txt
 ```
 
-# 2. Configure API keys
+### 2. Configure API keys
 ```bash
 cp .env.example .env
 Edit .env and configure the required environment variables:
@@ -89,19 +89,19 @@ LANGCHAIN_PROJECT=bootgen-agent
 OPENAI_API_KEY is used for embeddings. LANGCHAIN_API_KEY is optional and
 is only required if LangSmith tracing is enabled.
 
-# 3. Ensure the Vector Store Exists
+### 3. Ensure the Vector Store Exists
 The `vectorstore/` directory must exist before starting the Agent.
 
 If it does not exist, first run
 `rag-knowledge-bot` to load and index the technical
 documentation.
 
-# 4. Start the Streamlit UI
+### 4. Start the Streamlit UI
 ```bash
 streamlit run app.py
 ```
 
-# 5. Start the MCP Server (Optional)
+### 5. Start the MCP Server (Optional)
 ```bash
 mcp dev mcp_server.py
 ```
@@ -153,12 +153,12 @@ recovery, can be added without redesigning the entire workflow.
 LangSmith is integrated to trace the Agent execution flow. It provides
 visibility into:
 
-Complete inputs and outputs for each LLM decision
-Tool-call parameters and return values
-Latency distribution across the workflow
-Token usage
+- Complete inputs and outputs for each LLM decision
+- Tool-call parameters and return values
+- Latency distribution across the workflow
+- Token usage
 
-Example LangSmith Trace
+Example LangSmith Trace:https://smith.langchain.com/public/79a5705d-8365-4ce0-9e8f-da220bfb149c/r
 
 ## MCP Server
 

@@ -278,7 +278,7 @@ limited.
 latency.
 - The RAGAS Answer Relevancy metric has compatibility issues with the
 DeepSeek API because the API does not support n > 1.
-The knowledge base can be expanded to additional AMD documentation such as
+- The knowledge base can be expanded to additional AMD documentation such as
 AM011 and UG1304.
 - A managed vector database such as Pinecone could be considered as the
 knowledge base grows.

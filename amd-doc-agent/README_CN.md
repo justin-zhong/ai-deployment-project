@@ -50,7 +50,7 @@ pinned: false
 除 Streamlit UI 外，同时提供 RESTful API 接口，支持系统集成。响应中包含 `answer`、`question`、`sources` 三个字段，并通过中间件记录每次请求的响应时间。
 
 **Redis 缓存**
-相同问题第二次请求直接返回缓存结果，响应时间从 ~13 秒降至 ~0.005 秒（2600 倍提升）。缓存 key 经过文本标准化处理（转小写、去空格），避免同义重复请求穿透缓存。
+相同问题第二次请求直接返回缓存结果，响应时间从 ~13 秒降至 ~0.005 秒（2600 倍提升）。缓存 key 经过文本标准化处理（转小写、去空格），减少因大小写、空白等格式差异导致的缓存未命中。
 
 **RAGAS 评估框架**
 使用 RAGAS 对系统质量进行量化评估，相比项目2的关键词匹配更能捕捉语义层面的质量问题。
@@ -86,21 +86,29 @@ Docker 容器化，部署于 Hugging Face Spaces（CPU Free tier），公网可�
 
 ## 快速开始
 
+
+### 本地运行（Streamlit）
 ```bash
-# 本地运行（Streamlit）
 pip install -r requirements.txt
 cp .env.example .env
-# 填入 OPENAI_API_KEY 和 DEEPSEEK_API_KEY
+```
+填入 OPENAI_API_KEY 和 DEEPSEEK_API_KEY
+```bash
 streamlit run app.py
-
-# 本地运行（FastAPI）
+```
+### 本地运行（FastAPI）
+```bash
 uvicorn main:app --reload
-# 访问 http://localhost:8000/docs 查看交互式 API 文档
+```
+访问 http://localhost:8000/docs 查看交互式 API 文档
 
-# 启动 Redis（需要 Docker）
+### 启动 Redis（需要 Docker）
+```bash
 docker run -d -p 6379:6379 redis
+```
 
-# Docker 运行（完整应用）
+### Docker 运行（完整应用）
+```bash
 docker build -t amd-doc-agent .
 docker run -p 8501:8501 \
   -e OPENAI_API_KEY=your_key \

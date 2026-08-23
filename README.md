@@ -100,9 +100,9 @@ See [`bootgen-agent/README.md`](bootgen-agent/README.md) for details.
 
 **Directory:** `amd-doc-agent/`
 
-A production-style multi-document RAG system for AMD FPGA/SoC technical
-documentation, developed to address the retrieval limitations identified in
-the earlier projects.
+An end-to-end multi-document RAG system for AMD FPGA/SoC technical documentation
+for AMD FPGA/SoC technical documentation, developed to address the retrieval 
+limitations identified in the earlier projects.
 
 See [`amd-doc-agent/README.md`](amd-doc-agent/README.md) for implementation
 details.

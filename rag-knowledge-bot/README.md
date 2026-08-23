@@ -110,8 +110,10 @@ unit and use overlap to mitigate boundary truncation.
 
 The final configuration for this project is:
 
+```text
 chunk_size = 800
 chunk_overlap = 100
+```
 
 **Debugging approach:** The search() function in retriever.py can be used
 to directly inspect retrieved chunks. This makes it possible to quickly
@@ -140,7 +142,7 @@ impact on retrieval quality than simply switching to a more capable LLM.
 **Further Development:** Project 4 introduced Query Translation to address the multilingual
 retrieval problem. Before retrieval, an LLM translates the user's query into
 English, allowing the system to perform parallel Chinese and English
-retrieval and merge the results. See the [Project4 README](../amd-doc-agent) for details.
+retrieval and merge the results. See the [Project 4 README](../amd-doc-agent) for details.
 
 ## Known Limitations
 

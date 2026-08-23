@@ -90,10 +90,6 @@
 
 详见 [`amd-doc-agent/README.md`](amd-doc-agent/README.md)。
 
-## 快速开始
-
-每个子项目有独立的 `README.md` 和 `requirements.txt`，进入对应目录查看详细说明
-
 ---
 
 ## 关键工程发现
