@@ -57,10 +57,7 @@ pinned: false
 
 | 检索 | Faithfulness | Answer Relevancy | Context Precision |
 |---|---:|---:|---:|
-| Vector | 0.39 | 0.54 | 0.06 |
-| BM25 | - | - | — |
-| Vector + BM25 | - | - | - |
-| Vector + Query Translation | - | - | - |
+| Vector + Query Translation | 0.39 | 0.54 | 0.06 |
 | Vector + BM25 + Query Translation | 0.80 | 0.50 | 0.16 |
 
 引入 BM25 混合检索后，Faithfulness 提升 105%，Context Precision 提升 171%，
@@ -164,7 +161,7 @@ docker run -p 8501:8501 \
 项目2使用关键词匹配评估，简单但无法捕捉语义层面的质量问题。项目4引入 RAGAS，通过 Faithfulness 和 Context Precision 等指标量化评估，发现检索层是主要瓶颈，为后续优化指明方向。
 
 **Redis 缓存的实际效果**
-相同问题的响应时间从 13 秒（RAG 全流程）降至 0.005 秒（缓存命中），提升 2600 倍。通过文本标准化（转小写、去空格）处理同义重复请求，避免缓存穿透。
+相同问题的响应时间从 13 秒（RAG 全流程）降至 0.005 秒（缓存命中），提升 2600 倍。通过文本标准化（转小写、去空格）减少因格式差异导致的缓存未命中。
 
 ## 已知局限与后续方向
 

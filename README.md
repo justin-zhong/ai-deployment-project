@@ -100,9 +100,8 @@ See [`bootgen-agent/README.md`](bootgen-agent/README.md) for details.
 
 **Directory:** `amd-doc-agent/`
 
-An end-to-end multi-document RAG system for AMD FPGA/SoC technical documentation
-for AMD FPGA/SoC technical documentation, developed to address the retrieval 
-limitations identified in the earlier projects.
+An end-to-end multi-document RAG system for AMD FPGA/SoC technical documentation,
+developed to address the retrieval limitations identified in the earlier projects.
 
 See [`amd-doc-agent/README.md`](amd-doc-agent/README.md) for implementation
 details.
@@ -146,10 +145,11 @@ This improved cross-language retrieval for the mixed-language knowledge base.
 Vector search provides strong semantic matching but can be less effective for
 technical terminology, identifiers, command names, and exact phrases.
 
-BM25 complements vector search by providing lexical matching.
+BM25 complements vector search by providing lexical matching for technical
+terminology, identifiers, command names, and exact phrases.
 
-Combining the two approaches improved retrieval robustness for technical
-documentation containing both natural language and domain-specific terms.
+In the evaluation set, adding BM25 on top of Query Translation substantially
+improved Faithfulness and Context Precision.
 
 ---
 

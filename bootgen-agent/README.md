@@ -158,7 +158,7 @@ visibility into:
 - Latency distribution across the workflow
 - Token usage
 
-Example LangSmith Trace:https://smith.langchain.com/public/79a5705d-8365-4ce0-9e8f-da220bfb149c/r
+**Example LangSmith Trace:**[View trace](https://smith.langchain.com/public/79a5705d-8365-4ce0-9e8f-da220bfb149c/r)
 
 ## MCP Server
 

@@ -112,14 +112,12 @@ Project 2.
 
 | Retrieval | Faithfulness | Answer Relevancy | Context Precision |
 |---|---:|---:|---:|
-| Vector | 0.39 | 0.54 | 0.06 |
-| BM25 | - | - | — |
-| Vector + BM25 | - | - | - |
-|Vector + Query Translation| - | - | - |
+| Vector + Query Translation | 0.39 | 0.54 | 0.06 |
 |Vector + BM25 + Query Translation| 0.80 | 0.50 | 0.16 |
 
-The addition of BM25 hybrid retrieval and Query Translation improved
-**Faithfulness by 105%** and **Context Precision by 171%**, significantly
+Adding BM25 hybrid retrieval on top of Query Translation improved
+**Faithfulness by 105%** and **Context Precision by 171%** in the evaluation
+set, while Answer Relevancy remained roughly unchanged, significantly
 reducing unsupported or hallucinated responses in the evaluation set.
 
 The remaining low scores primarily originate from the retrieval layer:
