@@ -153,19 +153,26 @@ accessible.
 ```bash
 pip install -r requirements.txt
 cp .env.example .env
+```
+Add OPENAI_API_KEY and DEEPSEEK_API_KEY to .env
 
-# Add OPENAI_API_KEY and DEEPSEEK_API_KEY to .env
-
+```bash
 streamlit run app.py
+```
 
-# Local FastAPI Server
+### Local FastAPI Server
+```bash
 uvicorn main:app --reload
-# Open http://localhost:8000/docs to access the interactive API documentation.
+```
+Open http://localhost:8000/docs to access the interactive API documentation.
 
-# Start Redis with Docker
+### Start Redis with Docker
+```bash
 docker run -d -p 6379:6379 redis
+```
 
-# Run the Complete Application with Docker
+### Run the Complete Application with Docker
+```bash
 docker build -t amd-doc-agent .
 docker run -p 8501:8501 \
   -e OPENAI_API_KEY=your_key \

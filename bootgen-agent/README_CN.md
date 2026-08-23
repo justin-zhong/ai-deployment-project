@@ -4,7 +4,7 @@
 
 > **项目系列**：[项目1+2: RAG知识库](../rag-knowledge-bot) → **项目3: Bootgen Agent（当前）** → [项目4: 多文档RAG + 部署](../amd-doc-agent)
 
-基于 LangGraph 的 AMD Bootgen 专属助手。相比纯 RAG 方案，Agent 能主动决策调用哪个工具、按需链式执行多步操作，对结构化任务（BIF 生成、命令校验、器件对比）的回答质量显著优于检索方式。
+基于 LangGraph 的 AMD Bootgen 专属助手。相比纯 RAG 方案，Agent 能主动决策调用哪个工具、按需链式执行多步操作，对结构化任务（BIF 生成、命令校验、器件对比），基于确定性工具的执行结果比单纯依赖 RAG 检索更加可靠。
 
 ## Demo
 

@@ -103,7 +103,7 @@ different chunking configurations:
 | 500 | 150 | ✅ Answered the question, but incompletely (2 of 3 items) |
 | 800 | 100 | ✅ Complete answer with relevant related information |
 
-**Conclusion：** chunk_size primarily affects semantic completeness, while
+**Conclusion:** chunk_size primarily affects semantic completeness, while
 chunk_overlap helps reduce information loss at chunk boundaries. The
 preferred approach is to ensure that each chunk contains a complete semantic
 unit and use overlap to mitigate boundary truncation.
@@ -113,7 +113,7 @@ The final configuration for this project is:
 chunk_size = 800
 chunk_overlap = 100
 
-**Debugging approach：** The search() function in retriever.py can be used
+**Debugging approach:** The search() function in retriever.py can be used
 to directly inspect retrieved chunks. This makes it possible to quickly
 determine whether an issue originates from the retrieval or generation layer,
 rather than blindly modifying the prompt.
@@ -131,13 +131,13 @@ investigated:
 | Low evaluation accuracy | User questions did not match the terminology and writing style of the documentation | Shortened questions and aligned them more closely with document terminology | Some improvement, but gaps remained |
 | Poor retrieval discrimination | Repeated residual footer text reduced the distinction between relevant and irrelevant chunks | — | Partially addressed in Project 4 with Query Translation |
 
-**Key Finding：** For technical-document RAG, the primary bottleneck is often not the LLM, but
+**Key Finding:** For technical-document RAG, the primary bottleneck is often not the LLM, but
 data quality and the retrieval layer.
 
 PDF noise cleaning, chunking strategy, and query formulation had a much larger
 impact on retrieval quality than simply switching to a more capable LLM.
 
-**Further Development：** Project 4 introduced Query Translation to address the multilingual
+**Further Development:** Project 4 introduced Query Translation to address the multilingual
 retrieval problem. Before retrieval, an LLM translates the user's query into
 English, allowing the system to perform parallel Chinese and English
 retrieval and merge the results. See the [Project4 README](../amd-doc-agent) for details.

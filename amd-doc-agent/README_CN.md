@@ -60,8 +60,8 @@ pinned: false
 | Vector | 0.39 | 0.54 | 0.06 |
 | BM25 | - | - | — |
 | Vector + BM25 | - | - | - |
-|Vector + Query Translation| - | - | - |
-|Vector + BM25 + Query Translation| 0.80 | 0.50 | 0.16 |
+| Vector + Query Translation | - | - | - |
+| Vector + BM25 + Query Translation | 0.80 | 0.50 | 0.16 |
 
 引入 BM25 混合检索后，Faithfulness 提升 105%，Context Precision 提升 171%，
 幻觉问题显著改善。

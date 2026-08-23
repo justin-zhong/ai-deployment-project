@@ -15,11 +15,11 @@ r = redis.Redis(host="localhost", port=6379, db=0)
 app = FastAPI(title="AMD Doc Agent API")
 
 with open("vectorstore/chunks.pkl", "rb") as f:
-    chunks = pickle.load(f)
+    document_chunks = pickle.load(f)
 
 vs = load_vectorstore()
-retriever = get_retriever(vs, chunks)
-chain = build_rag_chain(retriever, vs, chunks)
+retriever = get_retriever(vs, document_chunks)
+chain = build_rag_chain(retriever, vs, document_chunks)
 
 class QuestionRequest(BaseModel):
     question: str
@@ -47,7 +47,7 @@ def ask_question(request: QuestionRequest):
     if cached:
         return AnswerResponse(**cached)
     try:
-        chunks = retrieve_multilingual(vs, request.question, k=4)
+        retrieved_chunks = retrieve_multilingual(vs, document_chunks, request.question, k=4)
         sources = {chunk.metadata["source"] for chunk in chunks}
         answer = ask(chain, request.question)
 

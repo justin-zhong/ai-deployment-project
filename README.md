@@ -183,8 +183,3 @@ Redis caching eliminates these steps for repeated queries, reducing latency
 from approximately **13 seconds to 5 milliseconds on cache hits**.
 
 ---
-
-## Quick Start
-
-Each project contains its own `README.md` and `requirements.txt`.
-See the corresponding directory for detailed setup instructions.
