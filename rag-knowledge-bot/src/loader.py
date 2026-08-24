@@ -1,11 +1,3 @@
-"""
-loader.py - 文档加载与切分
-
-- 支持加载 PDF 和 TXT 文件
-- 把长文档切成合适大小的 chunk
-- 返回 Document 对象列表
-"""
-
 from langchain_community.document_loaders import PyPDFLoader, TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 import os
@@ -13,16 +5,6 @@ import re
 
 
 def load_documents(data_dir: str) -> list:
-    """
-    从 data_dir 目录加载所有文档
-
-    Args:
-        data_dir: 文档目录路径
-
-    Returns:
-        documents: List[Document]
-    """
-    print(os.listdir(data_dir))
     documents = []
 
     for filename in os.listdir(data_dir):
@@ -37,22 +19,15 @@ def load_documents(data_dir: str) -> list:
             docs = loader.load()
         else:
             continue
-        # 去掉UG1283的前6页（前6页为封面和目录）
-        documents += docs[6:]
+        if filename == "UG1283.pdf":
+            documents += docs[6:]
+        else:
+            documents += docs
 
     return documents
 
 
 def split_documents(documents: list) -> list:
-    """
-    把文档切分成 chunk
-
-    Args:
-        documents: load_documents() 返回的文档列表
-
-    Returns:
-        chunks: List[Document]
-    """
     for doc in documents:
         # 清除页脚格式：“SendFeedback”
         doc.page_content = re.sub(r"^Send Feedback.*", "", doc.page_content, flags=re.MULTILINE)

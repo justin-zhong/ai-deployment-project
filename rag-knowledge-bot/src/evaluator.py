@@ -55,9 +55,6 @@ TEST_CASES = [
 
 
 def evaluate(chain) -> dict:
-    """
-    运行所有测试用例，返回评估报告
-    """
     scores = {}
     for case in TEST_CASES:
         result = ask(chain, case["question"])
@@ -73,9 +70,6 @@ def evaluate(chain) -> dict:
     return scores
 
 def print_report(results: dict):
-    """
-    打印每道题的得分和整体准确率
-    """
     total_score = 0.0
     for key,value in results.items():
         total_score += value[1]

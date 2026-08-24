@@ -1,10 +1,3 @@
-"""
-app.py - 主入口
-
-运行方式：
-    streamlit run app.py
-"""
-
 import streamlit as st
 import os
 from src.loader import load_documents, split_documents
@@ -24,8 +17,6 @@ with st.sidebar:
 
     if st.button("🔄 加载并索引文档", use_container_width=True, type="primary"):
         if not os.listdir("data"):
-            st.error("data/ 目录是空的，请先放入 PDF 或 TXT 文件")
-        elif not os.listdir("data"):
             st.error("data/ 目录是空的，请先放入 PDF 或 TXT 文件")
         else:
             with st.spinner("正在处理文档..."):

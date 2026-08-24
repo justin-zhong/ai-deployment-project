@@ -21,8 +21,8 @@
 
 ## 技术栈
 
-- **LangChain** — RAG 框架（文档加载、切分、检索链）
-- **OpenAI** — text-embedding-ada-002 向量化 + GPT-4o-mini 生成
+- **Hugging Face / Sentence Transformers** — `all-MiniLM-L6-v2` 本地向量化
+- **DeepSeek** — LLM 生成
 - **FAISS** — 本地向量数据库，支持持久化
 - **Streamlit** — Web UI
 
@@ -87,7 +87,7 @@ streamlit run app.py
 │   ├── embedder.py     # 向量化与 FAISS 存储
 │   ├── retriever.py    # 相似度检索
 │   ├── chain.py        # RAG 链组装（Prompt + LLM）
-│   └── evaluator.py    # 自动评估模块（15道测试题 + 关键词匹配评分）
+│   └── evaluator.py    # 自动评估模块（10道测试题 + 关键词匹配评分）
 ├── app.py              # Streamlit 入口（含评估面板）
 ├── vectorstore/        # 向量库持久化（自动生成）
 └── requirements.txt
@@ -137,6 +137,7 @@ streamlit run app.py
 ## 已知局限
 
 - PDF 中的图表、多栏表格解析质量有限，部分内容可能丢失语义
-- 向量化使用 OpenAI API，需要联网和费用
+- LLM 生成使用 DeepSeek API，需要联网并产生 API 调用成本
+- 向量化使用本地 Sentence Transformers 模型，无需调用 embedding API
 - 当前知识库仅含 UG1283，扩展多文档时建议替换为 Pinecone 等云端向量库
 - 检索区分度受残留页脚影响，考虑改用网页版文档加载（WebBaseLoader）以获得更干净的文本

@@ -21,8 +21,8 @@ A domain-specific RAG (Retrieval-Augmented Generation) knowledge base designed f
 
 ## Tech Stack
 
-- **LangChain** — RAG framework for document loading, text splitting, and retrieval chains
-- **OpenAI** — `text-embedding-ada-002` embeddings + GPT-4o-mini generation
+- **Hugging Face / Sentence Transformers** — `all-MiniLM-L6-v2` local embeddings
+- **DeepSeek** — LLM generation
 - **FAISS** — Local vector store with persistence support
 - **Streamlit** — Web UI
 
@@ -88,7 +88,7 @@ interface.
 │   ├── embedder.py     # Embedding generation and FAISS storage
 │   ├── retriever.py    # Similarity search
 │   ├── chain.py        # RAG chain assembly (Prompt + LLM)
-│   └── evaluator.py    # Automated evaluation (15 test questions + keyword matching)
+│   └── evaluator.py    # Automated evaluation (10 test questions + keyword matching)
 ├── app.py              # Streamlit entry point with evaluation dashboard
 ├── vectorstore/        # Persisted vector store (automatically generated)
 └── requirements.txt
@@ -180,8 +180,8 @@ retrieval and merge the results. See the [Project 4 README](../amd-doc-agent) fo
 
 - PDF charts and multi-column tables may not be parsed correctly, which can
 result in partial loss of semantic information.
-- Embeddings use the OpenAI API, requiring network access and incurring API
-costs.
+- LLM generation uses the DeepSeek API, requiring network access and incurring API costs. 
+Embeddings are generated locally using Sentence Transformers.
 - The current knowledge base contains only UG1283. For larger multi-document
 deployments, a managed vector database such as Pinecone could be considered.
 - Retrieval quality can still be affected by residual PDF footer text.
