@@ -64,7 +64,7 @@ python -c "import torch; print(torch.__version__); print(torch.cuda.is_available
 ```bash
 cp .env.example .env
 ```
-编辑 .env，填入你的 OPENAI_API_KEY
+编辑 .env，填入你的 DEEPSEEK_API_KEY
 
 ### 4. 放入文档（支持 PDF、TXT）
 ```bash

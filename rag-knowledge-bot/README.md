@@ -64,7 +64,7 @@ python -c "import torch; print(torch.__version__); print(torch.cuda.is_available
 ```bash
 cp .env.example .env
 ```
-Edit .env and add your OPENAI_API_KEY
+Edit .env and add your DEEPSEEK_API_KEY
 
 ### 4. Add documents (PDF or TXT)
 ```bash
