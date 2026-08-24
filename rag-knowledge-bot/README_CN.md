@@ -28,18 +28,51 @@
 
 ## 快速开始
 
+### 1.创建虚拟环境
+
+建议使用 Python `3.10`–`3.12` 创建独立虚拟环境：
+
 ```bash
-# 1. 安装依赖
+python -m venv .venv
+```
+Windows
+```bash
+.venv\Scripts\activate
+```
+macOS / Linux
+```bash
+source .venv/bin/activate
+```
+
+### 2. 安装依赖
+```bash
 pip install -r requirements.txt
+```
+项目默认使用 CPU 运行。若使用 NVIDIA GPU，请根据本机 CUDA/驱动环境安装对应的 PyTorch CUDA 版本。
 
-# 2. 配置 API Key
+例如，本项目已在 NVIDIA GeForce GTX 1050 + CUDA 12.6 PyTorch build 环境下验证：
+```bash
+pip install torch==2.13.0 --index-url https://download.pytorch.org/whl/cu126
+```
+
+验证 PyTorch 是否识别 GPU：
+```bash
+python -c "import torch; print(torch.__version__); print(torch.cuda.is_available())"
+```
+
+### 3. 配置 API Key
+```bash
 cp .env.example .env
-# 编辑 .env，填入你的 OPENAI_API_KEY
+```
+编辑 .env，填入你的 OPENAI_API_KEY
 
-# 3. 放入文档（支持 PDF、TXT）
+### 4. 放入文档（支持 PDF、TXT）
+```bash
 cp your_docs.pdf data/
+```
 
-# 4. 启动
+### 5. 启动
+```bash
 streamlit run app.py
 ```
 

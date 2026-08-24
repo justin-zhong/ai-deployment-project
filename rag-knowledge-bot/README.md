@@ -28,18 +28,50 @@ A domain-specific RAG (Retrieval-Augmented Generation) knowledge base designed f
 
 ## Quick Start
 
+### 1. Create a virtual environment
+
+It is recommended to use Python `3.10`-`3.12` to create individual virtual environments:
+
 ```bash
-# 1. Install dependencies
+python -m venv .venv
+```
+Windows
+```bash
+.venv\Scripts\activate
+```
+macOS / Linux
+```bash
+source .venv/bin/activate
+```
+
+### 2. Install dependencies
+```bash
 pip install -r requirements.txt
+```
+The project runs on CPU by default. For NVIDIA GPUs, install a PyTorch build compatible with your CUDA/driver environment.
 
-# 2. Configure API key
+For example, this project has been verified in an NVIDIA GeForce GTX 1050 + CUDA 12.6 PyTorch build environment:
+```bash
+pip install torch==2.13.0 --index-url https://download.pytorch.org/whl/cu126
+```
+
+Verify GPU availability:
+```bash
+python -c "import torch; print(torch.__version__); print(torch.cuda.is_available())"
+```
+
+### 3. Configure API key
+```bash
 cp .env.example .env
-# Edit .env and add your OPENAI_API_KEY
+```
+Edit .env and add your OPENAI_API_KEY
 
-# 3. Add documents (PDF or TXT)
+### 4. Add documents (PDF or TXT)
+```bash
 cp your_docs.pdf data/
-
-# 4. Start the application
+```
+### 5. Start the application
+```bash
 streamlit run app.py
 ```
 
