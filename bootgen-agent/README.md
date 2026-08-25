@@ -86,8 +86,9 @@ LANGCHAIN_API_KEY=your_key
 LANGCHAIN_TRACING_V2=true
 LANGCHAIN_PROJECT=bootgen-agent
 ```
-OPENAI_API_KEY is used for embeddings. LANGCHAIN_API_KEY is optional and
-is only required if LangSmith tracing is enabled.
+`DEEPSEEK_API_KEY` is used for the DeepSeek LLM.
+`OPENAI_API_KEY` is used only if the RAG embedding configuration requires it.
+`LANGCHAIN_API_KEY` is optional and only required for LangSmith tracing.
 
 ### 3. Ensure the Vector Store Exists
 The `vectorstore/` directory must exist before starting the Agent.
@@ -102,10 +103,8 @@ streamlit run app.py
 ```
 
 ### 5. Start the MCP Server (Optional)
-```bash
-mcp dev mcp_server.py
-```
-
+See the [MCP Server](#mcp-server) section below for instructions on running
+the MCP Server and MCP Inspector in separate terminals.
 ## Project Structure
 
 ```
@@ -162,19 +161,38 @@ visibility into:
 
 ## MCP Server
 
-All four tools are also exposed through an MCP Server, allowing any
-MCP-compatible client, such as Claude Desktop, to invoke them directly
-without going through the LangGraph Agent.
+The four tools are also exposed through an MCP Server, allowing MCP-compatible
+clients such as Claude Desktop or MCP Inspector to invoke them directly without
+going through the LangGraph Agent.
 
-Start the MCP development server with:
+**Testing with MCP Inspector**
+
+On Windows, run the MCP server and Inspector in separate terminals.
+
+**Terminal 1 — Start the MCP server**
+
+```bash
+mcp run mcp_server.py
+```
+Keep this terminal running. The server communicates with MCP clients through
+STDIO, so it may appear to wait without producing additional output.
+
+**Terminal 2 — Launch MCP Inspector**
 
 ```bash
 mcp dev mcp_server.py
 ```
 
-This separates the tool implementation from the Agent orchestration
-layer, allowing the same tools to be reused by different MCP-compatible
-clients.
+The command launches MCP Inspector and opens the web interface, where the
+available tools can be inspected and tested.
+
+This separation is intentional: the first terminal runs the MCP server,
+while the second runs the Inspector client used to connect to it.
+
+Note: If MCP Inspector is configured to launch the server automatically
+through uv, it may use a separate Python environment. Running the server
+explicitly with mcp run ensures that the project's virtual environment,
+dependencies, and environment variables are used.
 
 ## Key Design Decisions
 

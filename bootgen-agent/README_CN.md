@@ -69,6 +69,9 @@ LANGCHAIN_API_KEY=your_key（用于 LangSmith，可选）
 LANGCHAIN_TRACING_V2=true
 LANGCHAIN_PROJECT=bootgen-agent
 ```
+`DEEPSEEK_API_KEY` 用于调用 DeepSeek LLM。
+`OPENAI_API_KEY` 仅在 RAG embedding 配置需要时使用。
+`LANGCHAIN_API_KEY` 为可选项，仅在启用 LangSmith 追踪时需要。
 
 ### 3. 确保向量库已生成
 `vectorstore/` 目录需存在，否则先运行 `rag-knowledge-bot` 完成索引
@@ -79,9 +82,8 @@ streamlit run app.py
 ```
 
 ### 5. 启动 MCP Server（可选）
-```bash
-mcp dev mcp_server.py
-```
+具体测试方法请参考下方 [MCP Server](#mcp-server) 章节，
+需要分别启动 MCP Server 和 MCP Inspector
 
 ## 项目结构
 
@@ -126,7 +128,36 @@ mcp dev mcp_server.py
 
 ## MCP Server
 
-四个工具同时封装为 MCP Server，支持任意 MCP 兼容客户端（如 Claude Desktop）直接调用，无需通过 LangGraph Agent。
+四个工具同时封装为 MCP Server，支持 Claude Desktop、MCP Inspector
+等 MCP 兼容客户端直接调用，无需通过 LangGraph Agent
+
+**使用 MCP Inspector 测试**
+
+在 Windows 环境下，需要分别启动 MCP Server 和 MCP Inspector
+
+**终端 1 — 启动 MCP Server**
+
+```bash
+mcp run mcp_server.py
+```
+保持该终端运行。MCP Server 通过 STDIO 与 MCP 客户端通信，
+因此启动后可能不会继续输出日志，这是正常现象
+
+**终端 2 — 启动 MCP Inspector**
+
+```bash
+mcp dev mcp_server.py
+```
+
+该命令会启动 MCP Inspector 并打开 Web 界面，可以在 Inspector
+中查看和测试 MCP Server 暴露的工具
+
+这种分离运行方式是有意的：第一个终端运行 MCP Server，
+第二个终端运行用于连接和测试 Server 的 Inspector
+
+注意： 如果 MCP Inspector 配置为通过 uv 自动启动 Server，
+可能会使用独立的 Python 环境。显式使用 mcp run 启动 Server
+可以确保使用当前项目虚拟环境中的依赖和环境变量
 
 ```bash
 mcp dev mcp_server.py

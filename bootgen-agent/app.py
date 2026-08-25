@@ -1,10 +1,3 @@
-"""
-app.py - 主入口（UI 已写好，专注实现 src/ 里的逻辑）
-
-运行方式：
-    streamlit run app.py
-"""
-
 import streamlit as st
 import os
 from agent import agent

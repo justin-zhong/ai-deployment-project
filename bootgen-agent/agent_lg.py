@@ -38,9 +38,3 @@ graph.add_conditional_edges("agent", tools_condition)
 graph.add_edge("tools", "agent")  # 工具执行完回到agent继续决策
 # 4. 编译
 app = graph.compile()
-
-if __name__ == "__main__":
-    result = app.invoke({
-        "messages": [("user", "zynqmp和versal的区别是什么？")]
-    })
-    print(result["messages"][-1].content)

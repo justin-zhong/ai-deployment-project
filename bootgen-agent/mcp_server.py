@@ -1,3 +1,8 @@
+from dotenv import load_dotenv
+from pathlib import Path
+
+load_dotenv(Path(__file__).resolve().parent / ".env")
+
 from tools.bif_generator import generate_bif
 from tools.rag_tool import rag_search
 from tools.device_comparator import compare_devices
@@ -29,6 +34,3 @@ def mcp_comp_devices(device1: str, device2: str) -> str:
 @mcp.tool()
 def mcp_val_cmd(commands: str) -> str:
     return validate_command.invoke(commands)
-
-if __name__ == "__main__":
-    mcp.run()

@@ -1,11 +1,3 @@
-"""
-chain.py - 组装 RAG 链
-
-- 写一个好的 Prompt Template
-- 把检索器 + LLM 组装成完整的 RAG 链
-- 处理"找不到相关内容"的情况
-"""
-
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough
@@ -30,15 +22,6 @@ def format_docs(docs) -> str:
 
 
 def build_rag_chain(retriever):
-    """
-    组装 RAG 链
-
-    Args:
-        retriever: get_retriever() 返回的检索器
-
-    Returns:
-        chain: 可以直接调用的 RAG 链
-    """
     llm = ChatOpenAI(
         model="deepseek-chat",
         api_key=os.getenv("DEEPSEEK_API_KEY"),
@@ -58,15 +41,5 @@ def build_rag_chain(retriever):
 
 
 def ask(chain, question: str) -> str:
-    """
-    向 RAG 链提问
-
-    Args:
-        chain: build_rag_chain() 返回的链
-        question: 用户问题
-
-    Returns:
-        answer: 字符串答案
-    """
     answer = chain.invoke(question)
     return answer

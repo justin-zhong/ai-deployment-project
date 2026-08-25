@@ -28,6 +28,10 @@ def generate_bif(device: str, components: list) -> str:
                 bif += "{type=bootloader, file=PLM.elf}\n"
             case s if "pmc" in s:
                 bif += "{type=pmcdata, file=pmc_cdo.bin}\n"
+            case s if "bitstream" in s:
+                bif += "[bitstream] bitstream.bit\n"   
+            case s if "psmfw" in s:
+                bif += "{type=psmfw, file=psmfw.elf}\n"
             case _:
                 raise ValueError("Invalid component")
     bif += "}\n"
