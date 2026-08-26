@@ -15,3 +15,12 @@ sentence-transformers==4.1.0
 
 # Web UI
 streamlit==1.62.0
+
+# MCP
+mcp==1.29.1
+
+# Observability
+langsmith==0.11.1
+
+# Configuration
+python-dotenv==1.2.3
