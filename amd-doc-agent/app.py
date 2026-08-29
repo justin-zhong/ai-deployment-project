@@ -25,9 +25,10 @@ with st.sidebar:
                 st.session_state.vectorstore = vectorstore
             st.success(f"✅ 已索引 {len(chunks)} 个片段")
     if "vectorstore" not in st.session_state:
-        vs = load_vectorstore()
+        vs, chunks = load_vectorstore()
         if vs:
             st.session_state.vectorstore = vs
+            st.session_state.chunks = chunks
             st.info("已加载本地向量库")
     if st.button("运行评估", use_container_width=True):
         with st.spinner(""):
@@ -50,7 +51,7 @@ for msg in st.session_state.messages:
         st.write(msg["content"])
 
 if question := st.chat_input("请输入你的问题..."):
-    if "vectorstore" not in st.session_state:
+    if ("vectorstore" not in st.session_state or "chunks" not in st.session_state):
         st.error("请先在左侧初始化文档")
     else:
 

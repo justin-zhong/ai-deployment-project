@@ -39,4 +39,7 @@ def load_vectorstore():
         encode_kwargs={'normalize_embeddings': True},
     )
     vectorstore = FAISS.load_local(VECTORSTORE_PATH, embeddings, allow_dangerous_deserialization=True)
-    return vectorstore
+    with open(f"{VECTORSTORE_PATH}/chunks.pkl", "rb") as f:
+        chunks = pickle.load(f)
+
+    return vectorstore, chunks

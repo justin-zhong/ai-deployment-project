@@ -2,7 +2,7 @@ from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough, RunnableLambda
 from langchain_core.output_parsers import StrOutputParser
-from retriever import retrieve_multilingual
+from .retriever import retrieve_multilingual
 import os
 
 PROMPT_TEMPLATE = """

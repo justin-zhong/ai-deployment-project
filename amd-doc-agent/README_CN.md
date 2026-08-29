@@ -107,10 +107,7 @@ docker run -d -p 6379:6379 redis
 ### Docker 运行（完整应用）
 ```bash
 docker build -t amd-doc-agent .
-docker run -p 8501:8501 \
-  -e OPENAI_API_KEY=your_key \
-  -e DEEPSEEK_API_KEY=your_key \
-  amd-doc-agent
+docker run -p 8501:8501 -e DEEPSEEK_API_KEY=your_key amd-doc-agent
 ```
 
 ## 项目结构

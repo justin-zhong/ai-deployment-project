@@ -17,7 +17,7 @@ app = FastAPI(title="AMD Doc Agent API")
 with open("vectorstore/chunks.pkl", "rb") as f:
     document_chunks = pickle.load(f)
 
-vs = load_vectorstore()
+vs, document_chunks = load_vectorstore()
 retriever = get_retriever(vs, document_chunks)
 chain = build_rag_chain(retriever, vs, document_chunks)
 
@@ -48,7 +48,7 @@ def ask_question(request: QuestionRequest):
         return AnswerResponse(**cached)
     try:
         retrieved_chunks = retrieve_multilingual(vs, document_chunks, request.question, k=4)
-        sources = {chunk.metadata["source"] for chunk in chunks}
+        sources = {chunk.metadata["source"] for chunk in retrieved_chunks}
         answer = ask(chain, request.question)
 
         response =  AnswerResponse(
