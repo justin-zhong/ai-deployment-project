@@ -8,14 +8,9 @@ from src.chain import build_rag_chain, ask
 import redis
 from cache import get_cache, set_cache
 
-import pickle
-
 r = redis.Redis(host="localhost", port=6379, db=0)
 
 app = FastAPI(title="AMD Doc Agent API")
-
-with open("vectorstore/chunks.pkl", "rb") as f:
-    document_chunks = pickle.load(f)
 
 vs, document_chunks = load_vectorstore()
 retriever = get_retriever(vs, document_chunks)
