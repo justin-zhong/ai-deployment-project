@@ -8,7 +8,10 @@ from src.chain import build_rag_chain, ask
 import redis
 from cache import get_cache, set_cache
 
-r = redis.Redis(host="localhost", port=6379, db=0)
+import os
+
+redis_host = os.getenv("REDIS_HOST", "localhost")
+r = redis.Redis(host=redis_host, port=6379, db=0)
 
 app = FastAPI(title="AMD Doc Agent API")
 
