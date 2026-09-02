@@ -1,10 +1,14 @@
 import streamlit as st
 import os
+import requests
+
 from src.loader import load_documents, split_documents
 from src.embedder import build_vectorstore, load_vectorstore
 from src.retriever import get_retriever
 from src.chain import build_rag_chain, ask
 from src.evaluator import evaluate, print_report
+
+API_URL = os.getenv("API_URL", "http://localhost:8000")
 
 st.set_page_config(page_title="📚 知识库问答", layout="centered")
 st.title("📚 个人知识库问答机器人")
@@ -61,9 +65,14 @@ if question := st.chat_input("请输入你的问题..."):
 
         with st.chat_message("assistant"):
             with st.spinner("思考中..."):
-                retriever = get_retriever(st.session_state.vectorstore, st.session_state.chunks)
-                chain = build_rag_chain(retriever, st.session_state.vectorstore, st.session_state.chunks)
-                answer = ask(chain, question)
+                response = requests.post(
+                    f"{API_URL}/ask",
+                    json={"question": question},
+                    timeout=60,
+                )
+                response.raise_for_status()
+                result = response.json()
+                answer = result["answer"]
             st.write(answer)
 
         st.session_state.messages.append({"role": "assistant", "content": answer})
