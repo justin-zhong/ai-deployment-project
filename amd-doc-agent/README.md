@@ -13,7 +13,7 @@ pinned: false
 
 A production-oriented multi-document RAG system for AMD FPGA/SoC technical documentation. The system combines hybrid BM25 + vector retrieval, multilingual Query Translation, source attribution, Redis caching, and a FastAPI backend, and is containerized with Docker for deployment.
 
-🚀 **Live Demo:** [AMD Doc Agent]https://huggingface.co/spaces/chongyuanz/amd-doc-agent
+🚀 **Live Demo:** [AMD Doc Agent](https://huggingface.co/spaces/chongyuanz/amd-doc-agent)
 
 ![Screenshot of demo](images/demo.png)
 
@@ -217,6 +217,7 @@ Example Response:
 docker compose up --build
 ```
 Streamlit: http://localhost:8501
+
 FastAPI:   http://localhost:8000/docs
 
 ### Local Development
@@ -273,7 +274,7 @@ Open http://localhost:8000/docs to access the interactive API documentation.
 ```
 
 ## Project Evolution
-
+```
 Project 1 → Basic RAG
       ↓
 Project 2 → AMD Bootgen RAG
@@ -282,7 +283,7 @@ Project 3 → Bootgen Agent / LangGraph / MCP
       ↓
 Project 4 → Multi-document RAG / Hybrid Retrieval /
             Evaluation / API / Deployment
-
+```
 > **Project Series:** [Projects 1–2: RAG Knowledge Base](../rag-knowledge-bot) → [Project 3: Bootgen Agent](../bootgen-agent) → **Project 4: Multi-Document RAG + Deployment (Current)**
 
 ## Known Limitations

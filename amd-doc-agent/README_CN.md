@@ -162,6 +162,7 @@ curl -X POST "http://localhost:8000/ask" \
 docker compose up --build
 ```
 Streamlit: http://localhost:8501
+
 FastAPI:   http://localhost:8000/docs
 
 ### 本地开发
@@ -215,7 +216,7 @@ uvicorn main:app --reload
 ```
 
 ## 项目演进
-
+```
 项目 1 → Basic RAG
       ↓
 项目 2 → AMD Bootgen RAG
@@ -224,7 +225,7 @@ uvicorn main:app --reload
       ↓
 项目 4 → Multi-document RAG / Hybrid Retrieval /
             Evaluation / API / Deployment
-
+```
 > **项目系列**：[项目1+2: RAG知识库](../rag-knowledge-bot) → [项目3: Bootgen Agent](../bootgen-agent) → **项目4: 多文档RAG + 部署（当前）**
 
 ## 已知局限
