@@ -24,7 +24,6 @@ pypdf==6.16.2
 # General utilities (safe + widely compatible)
 tqdm>=4.66
 
-ragas==0.4.3
 pydantic==2.13.4
 
 streamlit==1.62.0

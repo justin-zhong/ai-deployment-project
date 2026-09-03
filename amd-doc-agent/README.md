@@ -11,14 +11,60 @@ pinned: false
 
 # 🔍 Project 4: AMD Technical Document Multi-Document Q&A System
 
-> **Project Series:** [Projects 1–2: RAG Knowledge Base](../rag-knowledge-bot) → [Project 3: Bootgen Agent](../bootgen-agent) → **Project 4: Multi-Document RAG + Deployment (Current)**
+A production-oriented multi-document RAG system for AMD FPGA/SoC technical documentation. The system combines hybrid BM25 + vector retrieval, multilingual Query Translation, source attribution, Redis caching, and a FastAPI backend, and is containerized with Docker for deployment.
 
-A multi-document RAG (Retrieval-Augmented Generation) system designed for AMD
-FPGA/SoC technical documentation. Building on the previous projects, this
-version introduces multi-document retrieval, multilingual search, RAGAS-based
-evaluation, a FastAPI backend, Redis caching, and cloud deployment.
+🚀 **Live Demo:** [https://huggingface.co/spaces/chongyuanz/amd-doc-agent]https://huggingface.co/spaces/chongyuanz/amd-doc-agent
 
-🚀 **Live Demo:** https://huggingface.co/spaces/chongyuanz/amd-doc-agent
+![Screenshot of demo](images/demo.png)
+
+## Engineering Highlights
+
+- **Hybrid Retrieval:** Combined FAISS semantic search with BM25 keyword retrieval for technical terminology.
+- **Multilingual Retrieval:** Added LLM-based Query Translation to improve cross-language retrieval across Chinese and English documentation.
+- **Evaluation:** Used RAGAS to compare retrieval strategies and quantify Faithfulness and Context Precision.
+- **Performance:** Added Redis caching, reducing repeated-query latency from ~13s to ~0.005s.
+- **Productionization:** Exposed the RAG pipeline through FastAPI and containerized the application with Docker Compose.
+- **Source Attribution:** Preserved document metadata throughout retrieval and generation to make answers traceable.
+
+## Architecture and Deployment Overview
+                    ┌─────────────────┐
+                    │   Streamlit UI  │
+                    └────────┬────────┘
+                             │
+                             ▼
+                    ┌─────────────────┐
+                    │    FastAPI      │
+                    │     /ask        │
+                    └────────┬────────┘
+                             │
+                       ┌─────▼─────┐
+                       │   Redis   │
+                       │   Cache   │
+                       └─────┬─────┘
+                             │ miss
+                             ▼
+                    ┌─────────────────┐
+                    │ Query Processing│
+                    │ Translation     │
+                    └────────┬────────┘
+                             │
+                ┌────────────┴────────────┐
+                ▼                         ▼
+          ┌───────────┐             ┌───────────┐
+          │   FAISS   │             │   BM25    │
+          │ Semantic  │             │ Keyword   │
+          └─────┬─────┘             └─────┬─────┘
+                └────────────┬────────────┘
+                             ▼
+                    ┌─────────────────┐
+                    │  LLM Generation │
+                    │ + Source Attribution
+                    └─────────────────┘
+
+Docker Compose
+├── Streamlit :8501
+├── FastAPI   :8000
+└── Redis     :6379
 
 ## Knowledge Base
 
@@ -71,9 +117,9 @@ Chinese queries.
 
 ### Source Attribution
 
-Each chunk stores source information in `metadata["source"]`. The generation
-prompt instructs the LLM to identify the source documents used in its answer,
-making responses traceable to the underlying technical documentation.
+Each chunk stores source information in `metadata["source"]`. Retrieved
+metadata is passed through the RAG pipeline and used to associate generated
+answers with the source documents used for retrieval.
 
 ### FastAPI Backend
 
@@ -98,27 +144,27 @@ the complete RAG pipeline again.
 | Full RAG pipeline | ~13 seconds |
 | Redis cache hit | ~0.005 seconds |
 
-This represents approximately a **2,600× reduction in latency on cache hits**.
-
 Cache keys are normalized by converting text to lowercase and removing
 whitespace, reducing unnecessary cache misses caused by minor differences in
 query formatting.
 
 ### RAGAS Evaluation
 
-RAGAS is used to quantitatively evaluate system quality. This provides a more
-semantic evaluation approach than the keyword-matching evaluation used in
-Project 2.
+An offline RAGAS evaluation pipeline was implemented to compare retrieval
+strategies using Faithfulness, Answer Relevancy, and Context Precision.
+
+The current evaluation results demonstrate the impact of hybrid retrieval,
+while Answer Relevancy remains subject to evaluator/API compatibility
+constraints with the current DeepSeek configuration.
 
 | Retrieval | Faithfulness | Answer Relevancy | Context Precision |
 |---|---:|---:|---:|
 | Vector + Query Translation | 0.39 | 0.54 | 0.06 |
-|Vector + BM25 + Query Translation| 0.80 | 0.50 | 0.16 |
+| Vector + BM25 + Query Translation | 0.80 | 0.50 | 0.16 |
 
 Adding BM25 hybrid retrieval on top of Query Translation improved
 **Faithfulness by 105%** and **Context Precision by 171%** in the evaluation
-set, while Answer Relevancy remained roughly unchanged, significantly
-reducing unsupported or hallucinated responses in the evaluation set.
+set, while Answer Relevancy remained roughly unchanged.
 
 The remaining low scores primarily originate from the retrieval layer:
 residual PDF noise remains after preprocessing, and semantic mismatch still
@@ -128,15 +174,16 @@ remain key areas for further optimization.
 ### Cloud Deployment
 
 The application is containerized with Docker and deployed to
-**Hugging Face Spaces** using the CPU Free tier, making the system publicly
+**Hugging Face Spaces** on the CPU Free tier, making the system publicly
 accessible.
 
 ## Tech Stack
 
 - **LangChain** — RAG framework for document loading, chunking, and retrieval
-- **OpenAI** — `text-embedding-ada-002` embeddings
+- **Hugging Face / Sentence Transformers** — `all-MiniLM-L6-v2` embeddings
 - **DeepSeek** — LLM generation
-- **FAISS** — Local vector store
+- **FAISS** — semantic vector store
+- **BM25** — keyword vector store
 - **RAGAS** — RAG evaluation framework
 - **FastAPI** — RESTful API backend
 - **Redis** — Response caching
@@ -146,13 +193,45 @@ accessible.
 
 ## Quick Start
 
+### API Example
+
+```bash
+curl -X POST "http://localhost:8000/ask" \
+  -H "Content-Type: application/json" \
+  -d '{"question":"What is Bootgen?"}'
+```
+
+Example Response:
+```json
+{
+  "answer": "...",
+  "question": "What is Bootgen?",
+  "sources": ["UG1085", "UG1137"]
+}  
+```
+
+### Run the Complete Application with Docker Compose
+```bash
+docker compose up --build
+```
+Streamlit: http://localhost:8501
+FastAPI:   http://localhost:8000/docs
+
+### Local Development
+The Streamlit and FastAPI applications can also be run individually.
+Redis must be running locally for the FastAPI cache to work.
+
+```bash
+docker run -d -p 6379:6379 redis
+```
+
 ### Local Streamlit Application
 
 ```bash
 pip install -r requirements.txt
 cp .env.example .env
 ```
-Add OPENAI_API_KEY and DEEPSEEK_API_KEY to .env
+Set `DEEPSEEK_API_KEY` in `.env`. Do not commit `.env` to the repository.
 
 ```bash
 streamlit run app.py
@@ -164,21 +243,11 @@ uvicorn main:app --reload
 ```
 Open http://localhost:8000/docs to access the interactive API documentation.
 
-### Start Redis with Docker
-```bash
-docker run -d -p 6379:6379 redis
-```
-
-### Run the Complete Application with Docker
-```bash
-docker build -t amd-doc-agent .
-docker run -p 8501:8501 -e DEEPSEEK_API_KEY=your_key amd-doc-agent
-```
-
 ## Project Structure
 
 ```
 ├── data/                  # Three AMD technical documentation PDFs
+├── images/
 ├── src/
 │   ├── loader.py          # Multi-document loading, noise cleaning, and source metadata
 │   ├── embedder.py        # Embedding generation and FAISS storage
@@ -191,91 +260,38 @@ docker run -p 8501:8501 -e DEEPSEEK_API_KEY=your_key amd-doc-agent
 ├── cache.py               # Redis caching logic
 ├── app.py                 # Streamlit entry point
 ├── Dockerfile
+├── Dockerfile.api
+├── docker-compose.yml
 ├── requirements.txt
+├── requirements-eval.txt
+├── README_CN.md
+├── .env.example
+├── .dockerignore
 └── README.md
 ```
 
 ## Project Evolution
 
-```
-Project 1: Basic RAG
-  · Single-document PDF/TXT support
-  · Local execution
-  · Keyword-based evaluation
-    ↓ Add domain-specific documentation + PDF noise cleaning
+Project 1 → Basic RAG
+      ↓
+Project 2 → AMD Bootgen RAG
+      ↓
+Project 3 → Bootgen Agent / LangGraph / MCP
+      ↓
+Project 4 → Multi-document RAG / Hybrid Retrieval /
+            Evaluation / API / Deployment
 
-Project 2: AMD Bootgen Q&A
-  · UG1283 single-document knowledge base
-  · PDF noise cleaning
-  · 15-question evaluation module
-    ↓ Add Agent + tool calling + MCP + LangSmith
+> **Project Series:** [Projects 1–2: RAG Knowledge Base](../rag-knowledge-bot) → [Project 3: Bootgen Agent](../bootgen-agent) → **Project 4: Multi-Document RAG + Deployment (Current)**
 
-Project 3: Bootgen Agent
-  · LangChain Agent → LangGraph
-  · Four domain-specific tools
-  · MCP Server
-  · LangSmith tracing
-    ↓ Add multi-document retrieval + multilingual search
-      + RAGAS + FastAPI + Redis + deployment
+## Known Limitations
 
-Project 4: AMD Multi-Document Q&A System (Current)
-  · Three-document mixed-language knowledge base
-  · Query Translation
-  · RAGAS evaluation
-  · FastAPI + Redis caching
-  · Docker + Hugging Face Spaces deployment
-```
+- Parsing quality for tables and multi-column layouts remains limited.
+- Query Translation introduces an additional LLM call and latency.
+- Answer Relevancy evaluation has compatibility constraints with the current
+  DeepSeek configuration.
 
-## Technical Challenges and Findings
+## Future Improvements
 
-**Multilingual Retrieval Bias**
-With OpenAI embeddings, Chinese queries tend to have higher similarity with
-Chinese chunks than English chunks. As a result, English documentation can be
-systematically under-retrieved.
-**Solution:** Query Translation generates an English version of the user's
-query before retrieval, enabling parallel Chinese and English searches.
-
-This substantially improves cross-language retrieval for the mixed-language
-knowledge base.
-
-**Impact of PDF Noise on Retrieval**
-Technical documentation often contains repeated headers, footers, page
-numbers, and other PDF artifacts. These repeated elements can contaminate the
-embedding space and artificially increase similarity between unrelated chunks.
-
-Regex-based cleaning combined with skipping cover and table-of-contents pages
-reduced the number of chunks from approximately 2,000 to 1,792, improving
-retrieval discrimination.
-
-**Evolution of the Evaluation Framework**
-Project 2 used keyword matching to evaluate answers. While simple, this
-approach cannot reliably capture semantic correctness.
-
-Project 4 introduced RAGAS, using metrics such as Faithfulness and Context
-Precision to quantitatively evaluate the RAG pipeline.
-
-The evaluation showed that retrieval quality was the primary bottleneck,
-providing a clear direction for further optimization.
-
-**Practical Impact of Redis Caching**
-For identical queries, response latency decreased from approximately
-13 seconds for the complete RAG pipeline to 0.005 seconds on a Redis
-cache hit — approximately a 2,600× reduction.
-
-Query normalization, including lowercasing and whitespace removal, helps
-reduce unnecessary cache misses from minor formatting differences.
-
-## Known Limitations and Future Directions
-
-- Parsing quality for tables and multi-column layouts in English PDFs remains
-limited.
-- Query Translation introduces an additional LLM call and therefore adds some
-latency.
-- The RAGAS Answer Relevancy metric has compatibility issues with the
-DeepSeek API because the API does not support n > 1.
-- The knowledge base can be expanded to additional AMD documentation such as
-AM011 and UG1304.
-- A managed vector database such as Pinecone could be considered as the
-knowledge base grows.
-- A reranking model could be introduced to further improve retrieval
-precision.
+- Expand the knowledge base with additional AMD documentation.
+- Add a reranking stage to improve retrieval precision.
+- Evaluate managed vector databases as the corpus grows.
