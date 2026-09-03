@@ -33,8 +33,8 @@ pinned: false
                              │
                              ▼
                     ┌─────────────────┐
-                    │    FastAPI      │
-                    │     /ask        │
+                    │     FastAPI     │
+                    │      /ask       │
                     └────────┬────────┘
                              │
                        ┌─────▼─────┐
@@ -45,26 +45,28 @@ pinned: false
                              ▼
                     ┌─────────────────┐
                     │ Query Processing│
-                    │ Translation     │
+                    │   Translation   │
                     └────────┬────────┘
                              │
                 ┌────────────┴────────────┐
                 ▼                         ▼
           ┌───────────┐             ┌───────────┐
           │   FAISS   │             │   BM25    │
-          │ Semantic  │             │ Keyword   │
+          │ Semantic  │             │  Keyword  │
           └─────┬─────┘             └─────┬─────┘
                 └────────────┬────────────┘
                              ▼
-                    ┌─────────────────┐
-                    │  LLM Generation │
-                    │ + Source Attribution
-                    └─────────────────┘
+                  ┌─────────────────────┐
+                  │  LLM Generation     │
+                  │+ Source Attribution │
+                  └─────────────────────┘
 
 Docker Compose
+```
 ├── Streamlit :8501
 ├── FastAPI   :8000
 └── Redis     :6379
+```
 
 ## 知识库文档
 

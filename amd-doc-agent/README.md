@@ -33,8 +33,8 @@ A production-oriented multi-document RAG system for AMD FPGA/SoC technical docum
                              │
                              ▼
                     ┌─────────────────┐
-                    │    FastAPI      │
-                    │     /ask        │
+                    │     FastAPI     │
+                    │      /ask       │
                     └────────┬────────┘
                              │
                        ┌─────▼─────┐
@@ -45,26 +45,28 @@ A production-oriented multi-document RAG system for AMD FPGA/SoC technical docum
                              ▼
                     ┌─────────────────┐
                     │ Query Processing│
-                    │ Translation     │
+                    │   Translation   │
                     └────────┬────────┘
                              │
                 ┌────────────┴────────────┐
                 ▼                         ▼
           ┌───────────┐             ┌───────────┐
           │   FAISS   │             │   BM25    │
-          │ Semantic  │             │ Keyword   │
+          │ Semantic  │             │  Keyword  │
           └─────┬─────┘             └─────┬─────┘
                 └────────────┬────────────┘
                              ▼
-                    ┌─────────────────┐
-                    │  LLM Generation │
-                    │ + Source Attribution
-                    └─────────────────┘
+                  ┌─────────────────────┐
+                  │  LLM Generation     │
+                  │+ Source Attribution │
+                  └─────────────────────┘
 
 Docker Compose
+```
 ├── Streamlit :8501
 ├── FastAPI   :8000
 └── Redis     :6379
+```
 
 ## Knowledge Base
 
