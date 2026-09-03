@@ -13,7 +13,7 @@ pinned: false
 
 A production-oriented multi-document RAG system for AMD FPGA/SoC technical documentation. The system combines hybrid BM25 + vector retrieval, multilingual Query Translation, source attribution, Redis caching, and a FastAPI backend, and is containerized with Docker for deployment.
 
-🚀 **Live Demo:** [https://huggingface.co/spaces/chongyuanz/amd-doc-agent]https://huggingface.co/spaces/chongyuanz/amd-doc-agent
+🚀 **Live Demo:** [AMD Doc Agent]https://huggingface.co/spaces/chongyuanz/amd-doc-agent
 
 ![Screenshot of demo](images/demo.png)
 
@@ -112,7 +112,7 @@ To address this, the system uses **Query Translation** before retrieval:
 3. Merge and deduplicate the results.
 4. Select the final top-k chunks.
 
-This significantly improves retrieval of relevant English documentation for
+This improves retrieval of relevant English documentation for
 Chinese queries.
 
 ### Source Attribution
@@ -183,7 +183,7 @@ accessible.
 - **Hugging Face / Sentence Transformers** — `all-MiniLM-L6-v2` embeddings
 - **DeepSeek** — LLM generation
 - **FAISS** — semantic vector store
-- **BM25** — keyword vector store
+- **BM25** — keyword retrieval
 - **RAGAS** — RAG evaluation framework
 - **FastAPI** — RESTful API backend
 - **Redis** — Response caching

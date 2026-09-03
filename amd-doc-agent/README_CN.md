@@ -11,9 +11,9 @@ pinned: false
 
 # 🔍 项目4：AMD 技术文档多文档问答系统
 
-面向 AMD FPGA/SoC 技术文档的多文档 RAG（检索增强生成）问答系统。在前序项目基础上，进一步引入 **BM25 + 向量混合检索、多语言 Query Translation、RAGAS 评估、FastAPI 后端、Redis 缓存以及 Docker 云端部署，**重点解决多文档场景下的跨语言检索偏差、检索质量和系统性能问题
+面向 AMD FPGA/SoC 技术文档的多文档 RAG（检索增强生成）问答系统。在前序项目基础上，进一步引入 **BM25 + 向量混合检索、多语言 Query Translation、RAGAS 评估、FastAPI 后端、Redis 缓存以及 Docker 云端部署**，重点解决多文档场景下的跨语言检索偏差、检索质量和系统性能问题
 
-🚀 **Live Demo:** [https://huggingface.co/spaces/chongyuanz/amd-doc-agent](https://huggingface.co/spaces/chongyuanz/amd-doc-agent)
+🚀 **Live Demo:** [AMD Doc Agent](https://huggingface.co/spaces/chongyuanz/amd-doc-agent)
 
 ![Screenshot of demo](images/demo.png)
 
@@ -93,6 +93,7 @@ Docker Compose
 中英文混合知识库存在跨语言检索偏差：中文问题更容易与中文 chunk 产生较高的 embedding 相似度，使英文文档存在被低估的风险
 
 为缓解这一问题，系统在检索前使用 LLM 将用户问题转换为英文 Query，并使用原始 Query 和英文 Query 分别进行检索，再对结果进行合并、去重并选取最终 Top-k chunks，从而改善中文问题对英文技术文档的召回效果
+
 **来源标注（Source Attribution）**
 每个 chunk 保留 `metadata["source"]` 等来源信息。检索后的 metadata 会沿 RAG Pipeline 传递至生成阶段，并用于关联回答所依据的源文档，使生成结果具备可追溯性
 
