@@ -18,6 +18,16 @@
 
 ---
 
+## 工程能力
+本项目主要体现以下 AI 应用工程能力:
+
+- 构建与评估 RAG 系统
+- 设计支持工具调用的 LLM Agent
+- 使用混合检索与 Query Translation 优化检索效果
+- 通过 REST API 对外提供 AI 服务
+- 使用缓存降低应用延迟
+- 使用 Docker 完成 AI 应用容器化与部署
+
 ## 项目演进
 
 ```
@@ -31,13 +41,13 @@
   · 系统分析技术文档 RAG 的检索局限性
     ↓
 项目3: Bootgen 智能助手 Agent
-  · LangChain Agent → LangGraph 重构（黑盒→状态图）
+  · LangChain Agent → LangGraph StateGraph 重构，将 Agent 工作流显式建模为状态图
   · 4个专属工具：RAG检索 / BIF生成 / 命令校验 / 器件对比
   · MCP Server 封装，支持 Claude Desktop 等客户端调用
   · LangSmith 集成，Agent 链路完整可观测
     ↓
 项目4: AMD 多文档问答系统（已部署）
-  · 3份文档（UG1283中文 + UG1085/UG1137英文）跨文档检索
+  · Extended the domain RAG system to 3 AMD technical documents with hybrid retrieval and multilingual query translation
   · Query Translation 解决中英文检索偏差
   · RAGAS 评估框架（Faithfulness / Context Precision）
   · FastAPI RESTful API + Redis 缓存（响应从13s降至0.005s）
@@ -98,7 +108,7 @@
 
 对于 BIF 生成、命令校验、器件对比等具有明确输入输出的结构化任务，确定性工具比纯 RAG 检索具有更高的可靠性。
 
-**RAG 更适合开放性的技术知识检索，而规则和工具更适合输入输出明确的结构化工程任务。**
+**RAG 更适合开放性的技术知识检索，而确定性工具更适合输入输出明确的结构化工程任务。**
 
 这一发现直接推动了项目3的 Agent 架构设计：由 Agent 根据任务类型选择 RAG 检索或确定性工具。
 
