@@ -2,13 +2,15 @@ from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_community.retrievers import BM25Retriever
 from langchain_classic.retrievers.ensemble import EnsembleRetriever
-import os
+from src.util import get_deepseek_api_key
 
 TRANSLATE_PROMPT = """
 你是一个知识库问答助手。如果下面的问题是中文，请将问题翻译为英文并返回。
 
 问题：{question}
 """
+
+deepseek_key = get_deepseek_api_key()
 
 def get_retriever(vectorstore, chunks: list = [], k: int = 4):
     vectorRetriever = vectorstore.as_retriever(
@@ -37,7 +39,7 @@ def search(vectorstore, query: str, k: int = 4) -> list:
 def retrieve_multilingual(vectorstore, chunks: list, query: str, k: int = 4) -> list:
     llm = ChatOpenAI(
         model= "deepseek-chat", 
-        api_key = os.getenv('DEEPSEEK_API_KEY'),
+        api_key = deepseek_key,
         base_url="https://api.deepseek.com",
         temperature=0)
     prompt = ChatPromptTemplate.from_template(TRANSLATE_PROMPT)

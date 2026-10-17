@@ -10,6 +10,7 @@ from langchain_community.embeddings import HuggingFaceEmbeddings
 from retriever import get_retriever, search, retrieve_multilingual
 from chain import build_rag_chain, ask
 from embedder import load_vectorstore
+from src.util import get_deepseek_api_key
 
 import numpy as np
 
@@ -60,6 +61,8 @@ TEST_CASES = [
     },
 ]
 
+deepseek_key = get_deepseek_api_key()
+
 def run_ragas_evaluation(use_multilingual: bool = False):
     vs = load_vectorstore()
 
@@ -101,7 +104,7 @@ def run_ragas_evaluation(use_multilingual: bool = False):
     
     llm = LangchainLLMWrapper(ChatOpenAI(
         model="deepseek-chat",
-        api_key=os.getenv("DEEPSEEK_API_KEY"),
+        api_key=deepseek_key,
         base_url="https://api.deepseek.com",
         temperature=0,
         n=1
