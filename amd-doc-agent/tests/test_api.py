@@ -1,6 +1,7 @@
-import main
-from fastapi.testclient import TestClient
 import redis
+from fastapi.testclient import TestClient
+
+import main
 
 
 def test_ask_returns_cached_answer(monkeypatch):
@@ -9,11 +10,6 @@ def test_ask_returns_cached_answer(monkeypatch):
         main.app.dependency_overrides,
         main.get_redis_client,
         lambda: None
-    )
-    monkeypatch.setitem(
-        main.app.dependency_overrides,
-        main.get_rag_components,
-        lambda: (None, [], None)
     )
 
     # Simulate an existing cached response.
@@ -44,9 +40,9 @@ def test_ask_succeeds_when_redis_unavailable(monkeypatch):
         main.get_redis_client,
         lambda: None
     )
-    monkeypatch.setitem(
-        main.app.dependency_overrides,
-        main.get_rag_components,
+    monkeypatch.setattr(
+        main,
+        "get_rag_components",
         lambda: (None, [], None)
     )
 
@@ -64,8 +60,8 @@ def test_ask_succeeds_when_redis_unavailable(monkeypatch):
     )
     monkeypatch.setattr(
         main,
-        "ask",
-        lambda chain, question: "Mock answer",
+        "ask_with_context",
+        lambda chain, question, docs: "Mock answer",
     )
     monkeypatch.setattr(main, "set_cache", redis_unavailable)
 
@@ -87,9 +83,9 @@ def test_ask_returns_safe_error_when_rag_fails(monkeypatch):
         main.get_redis_client,
         lambda: None
     )
-    monkeypatch.setitem(
-        main.app.dependency_overrides,
-        main.get_rag_components,
+    monkeypatch.setattr(
+        main,
+        "get_rag_components",
         lambda: (None, [], None)
     )
 
@@ -101,11 +97,11 @@ def test_ask_returns_safe_error_when_rag_fails(monkeypatch):
     )
 
     # Simulate an unexpected failure during answer generation.
-    def fail_to_answer(chain, question):
+    def fail_to_answer(chain, question, docs):
         raise RuntimeError("Internal implementation details")
 
     monkeypatch.setattr(main, "retrieve_multilingual", lambda *a, **kw: [])
-    monkeypatch.setattr(main, "ask", fail_to_answer)
+    monkeypatch.setattr(main, "ask_with_context", fail_to_answer)
 
     with TestClient(main.app) as client:
         response = client.post(

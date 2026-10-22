@@ -1,8 +1,9 @@
-from langchain_huggingface import HuggingFaceEmbeddings
-from langchain_community.vectorstores import FAISS
 import os
-import torch
 import pickle
+
+import torch
+from langchain_community.vectorstores import FAISS
+from langchain_huggingface import HuggingFaceEmbeddings
 
 VECTORSTORE_PATH = "vectorstore"
 

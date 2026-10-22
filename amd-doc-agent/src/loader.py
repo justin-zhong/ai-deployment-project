@@ -1,9 +1,11 @@
-from langchain_community.document_loaders import PyPDFLoader, TextLoader
-from langchain_text_splitters import RecursiveCharacterTextSplitter
 import os
 import re
 
-def find_content_start_by_pattern(docs, patterns=["chapter", "introduction", "概述"]):
+from langchain_community.document_loaders import PyPDFLoader, TextLoader
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+
+
+def find_content_start_by_pattern(docs, patterns=("chapter", "introduction", "概述")):
     for i, doc in enumerate(docs):
         content = doc.page_content.lower()
         

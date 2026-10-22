@@ -1,18 +1,15 @@
-import os
 from datasets import Dataset
-from ragas import evaluate
-from ragas.metrics import faithfulness, answer_relevancy, context_precision
-from ragas.llms import LangchainLLMWrapper
-from ragas.embeddings import LangchainEmbeddingsWrapper
-from langchain_openai import ChatOpenAI
 from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_openai import ChatOpenAI
+from ragas import evaluate
+from ragas.embeddings import LangchainEmbeddingsWrapper
+from ragas.llms import LangchainLLMWrapper
+from ragas.metrics import answer_relevancy, context_precision, faithfulness
 
-from retriever import get_retriever, search, retrieve_multilingual
-from chain import build_rag_chain, ask
-from embedder import load_vectorstore
+from src.chain import ask_with_context, build_answer_chain
+from src.embedder import load_vectorstore
+from src.retriever import retrieve_multilingual, search
 from src.util import get_deepseek_api_key
-
-import numpy as np
 
 TEST_CASES = [
     {
@@ -61,22 +58,17 @@ TEST_CASES = [
     },
 ]
 
-deepseek_key = get_deepseek_api_key()
-
 def run_ragas_evaluation(use_multilingual: bool = False):
-    vs = load_vectorstore()
+    loaded = load_vectorstore()
 
-    document_chunks = None
+    if loaded is None:
+        raise RuntimeError(
+            "Vector store not found. Build or restore the vector store first."
+        )
+
+    vs, document_chunks = loaded
     
-    if use_multilingual:
-        import pickle
-        with open("vectorstore/chunks.pkl", "rb") as f:
-            document_chunks = pickle.load(f)
-        retriever = get_retriever(vs, document_chunks, k=4)
-    else:
-        retriever = get_retriever(vs)
-        
-    chain = build_rag_chain(retriever, vs, document_chunks)
+    answer_chain = build_answer_chain()
     
     questions, answers, contexts, ground_truths = [], [], [], []
     
@@ -87,7 +79,7 @@ def run_ragas_evaluation(use_multilingual: bool = False):
             chunks = retrieve_multilingual(vs, document_chunks, q, k=4)
         else:
             chunks = search(vs, q, 4)
-        answer = ask(chain, q)
+        answer = ask_with_context(answer_chain, q, chunks)
         chunk_texts = [chunk_text.page_content for chunk_text in chunks]
         
         questions.append(q)
@@ -102,18 +94,23 @@ def run_ragas_evaluation(use_multilingual: bool = False):
         "ground_truth": ground_truths
     })
     
-    llm = LangchainLLMWrapper(ChatOpenAI(
-        model="deepseek-chat",
-        api_key=deepseek_key,
-        base_url="https://api.deepseek.com",
-        temperature=0,
-        n=1
-    ))
-    embeddings = LangchainEmbeddingsWrapper(HuggingFaceEmbeddings(
-        model_name="sentence-transformers/all-MiniLM-L6-v2",
-        model_kwargs={'device': 'cuda'},  # Use 'cuda' if you have GPU
-        encode_kwargs={'normalize_embeddings': True},
-    ))
+    llm = LangchainLLMWrapper(
+        ChatOpenAI(
+            model="deepseek-chat",
+            api_key=get_deepseek_api_key(),
+            base_url="https://api.deepseek.com",
+            temperature=0,
+            n=1
+        )
+    )
+
+    embeddings = LangchainEmbeddingsWrapper(
+        HuggingFaceEmbeddings(
+            model_name="sentence-transformers/all-MiniLM-L6-v2",
+            model_kwargs={'device': 'cuda'},
+            encode_kwargs={'normalize_embeddings': True},
+        )
+    )
     
     result = evaluate(
         dataset,

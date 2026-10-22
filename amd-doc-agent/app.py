@@ -1,7 +1,7 @@
-import streamlit as st
 import os
-import requests
 
+import requests
+import streamlit as st
 
 API_URL = os.getenv("API_URL", "http://localhost:8000")
 
@@ -31,41 +31,40 @@ if question := st.chat_input("请输入你的问题..."):
         with st.chat_message("user"):
             st.write(question)
 
-        with st.chat_message("assistant"):
-            with st.spinner("思考中..."):
-                try:
-                    response = requests.post(
-                        f"{API_URL}/ask",
-                        json={"question": question},
-                        timeout=60,
-                    )
-                    response.raise_for_status()
-                    result = response.json()
+        with st.chat_message("assistant"), st.spinner("思考中..."):
+            try:
+                response = requests.post(
+                    f"{API_URL}/ask",
+                    json={"question": question},
+                    timeout=60,
+                )
+                response.raise_for_status()
+                result = response.json()
                     
-                    answer = result["answer"]
-                    sources = result.get("sources", [])
+                answer = result["answer"]
+                sources = result.get("sources", [])
                     
-                    st.write(answer)
+                st.write(answer)
                     
-                    if sources:
-                        with st.expander("参考来源"):
-                            for source in sources:
-                                st.write(f"- {source}")
+                if sources:
+                    with st.expander("参考来源"):
+                        for source in sources:
+                            st.write(f"- {source}")
 
-                    st.session_state.messages.append({"role": "assistant", "content": answer})
+                st.session_state.messages.append({"role": "assistant", "content": answer})
                     
-                except requests.HTTPError as exc:
-                    status_code = exc.response.status_code
-                    st.error(
-                        f"后端请求失败（HTTP {status_code}）。"
-                        "请检查 FastAPI 日志。"
-                    )
+            except requests.HTTPError as exc:
+                status_code = exc.response.status_code
+                st.error(
+                    f"后端请求失败（HTTP {status_code}）。"
+                    "请检查 FastAPI 日志。"
+                )
                     
-                except requests.RequestException:
-                    st.error(
-                        "无法连接到 FastAPI 后端。"
-                        "请确认后端已启动，并检查 API_URL 配置。"
-                    )
+            except requests.RequestException:
+                st.error(
+                    "无法连接到 FastAPI 后端。"
+                    "请确认后端已启动，并检查 API_URL 配置。"
+                )
                 
-                except (ValueError, KeyError):
-                    st.error("后端返回的数据格式不符合预期。")
+            except (ValueError, KeyError):
+                st.error("后端返回的数据格式不符合预期。")

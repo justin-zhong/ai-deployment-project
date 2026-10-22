@@ -1,5 +1,6 @@
 import os
 
+
 def get_deepseek_api_key() -> str:
     api_key = os.getenv("DEEPSEEK_API_KEY")
     if not api_key:

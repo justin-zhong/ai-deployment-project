@@ -1,6 +1,7 @@
-import redis
 import json
-import os
+
+import redis
+
 
 def normalize_question(question: str) -> str:
     return question.lower().strip()
