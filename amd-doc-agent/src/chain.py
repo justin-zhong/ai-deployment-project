@@ -1,9 +1,8 @@
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough
-from langchain_openai import ChatOpenAI
 
-from src.util import get_deepseek_api_key
+from src.llm_client import build_deepseek_llm
 
 PROMPT_TEMPLATE = """
 你是一个知识库问答助手。请根据以下上下文回答用户的问题。
@@ -20,18 +19,10 @@ PROMPT_TEMPLATE = """
 def format_docs(docs) -> str:
     return "\n\n".join([f"{doc.metadata['source']}\n{doc.page_content}" for doc in docs])
 
-def _build_deepseek_llm():
-    return ChatOpenAI(
-        model="deepseek-chat",
-        api_key=get_deepseek_api_key(),
-        base_url="https://api.deepseek.com",
-        temperature=0
-    )
-
 def build_answer_chain():
     prompt = ChatPromptTemplate.from_template(PROMPT_TEMPLATE)
     
-    return prompt | _build_deepseek_llm() | StrOutputParser()
+    return prompt | build_deepseek_llm() | StrOutputParser()
 
 def ask_with_context(chain, question: str, docs) -> str:
     return chain.invoke({
