@@ -112,3 +112,21 @@ def test_ask_returns_safe_error_when_rag_fails(monkeypatch):
     assert response.status_code == 500
     assert response.json()["detail"] == "Internal server error"
     assert "Internal implementation details" not in response.text
+
+
+def test_health_ready_returns_503_when_rag_fails(monkeypatch):
+    def fail_to_initialize():
+        raise RuntimeError("Vector store unavailable")
+
+    monkeypatch.setattr(
+        main,
+        "get_rag_components",
+        fail_to_initialize,
+    )
+
+    with TestClient(main.app) as client:
+        response = client.get("/health/ready")
+
+    assert response.status_code == 503
+    assert response.json()["detail"] == "Service not ready"
+    assert "Vector store unavailable" not in response.text
